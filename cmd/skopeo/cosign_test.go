@@ -32,6 +32,13 @@ func run(t *testing.T, cmd *exec.Cmd) {
 	t.Logf("%s %s: %s", cmd.Path, strings.Join(cmd.Args, " "), out)
 }
 
+func runAndLogSkopeo(t *testing.T, args ...string) string {
+	out, err := runSkopeo(args...)
+	require.NoError(t, err)
+	t.Logf("skopeo %s: %s", strings.Join(args, " "), out)
+	return out
+}
+
 func generateKeys(t *testing.T) keys {
 	dir := t.TempDir()
 	cmd := exec.Command("cosign", "generate-key-pair")
@@ -54,10 +61,8 @@ func ensureTestImage(t *testing.T) {
 	}
 	t.Logf("pristine test image missing, creating it")
 
-	out, err := runSkopeo("--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
 		"docker://quay.io/libpod/alpine:3.10.2", "docker://"+cosignPristineTestImage)
-	require.NoError(t, err)
-	t.Logf("copy: %s", out)
 }
 
 func TestCosignStandaloneVerify(t *testing.T) {
@@ -67,10 +72,8 @@ func TestCosignStandaloneVerify(t *testing.T) {
 
 	testRepo := fmt.Sprintf("%s/test-repo-%d", cosignTempRegistry, rand.NewSource(time.Now().Unix()).Int63())
 	testImage := testRepo + "/alpine:3.10.2"
-	out, err := runSkopeo("--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
 		"docker://"+cosignPristineTestImage, "docker://"+testImage)
-	require.NoError(t, err)
-	t.Logf("copy: %s", out)
 
 	dir := t.TempDir()
 
@@ -80,14 +83,10 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	run(t, cmd)
 
 	imageDir := t.TempDir()
-	out, err = runSkopeo("--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
-	require.NoError(t, err)
-	t.Logf("copy: %s", out)
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
 
 	sigImageDir := t.TempDir()
-	out, err = runSkopeo("--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testRepo+"/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig", "dir:"+sigImageDir)
-	require.NoError(t, err)
-	t.Logf("copy: %s", out)
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testRepo+"/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig", "dir:"+sigImageDir)
 	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
 	sigSrc, err := sigRef.NewImageSource(context.Background(), nil)
@@ -97,8 +96,49 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	layers := image.LayerInfos()
 	require.NotEmpty(t, layers)
 
-	out, err = runSkopeo("cosign-standalone-verify", "--public-key", keys.pub, filepath.Join(imageDir, "manifest.json"),
-		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--require-rekor=false",
+		filepath.Join(imageDir, "manifest.json"), filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
+}
+
+// FIXME: Also c/image policy verification for interoperability, both ways.
+
+func TestCosignRekorVerify(t *testing.T) {
+	ensureTestImage(t)
+
+	keys := generateKeys(t)
+
+	testRepo := fmt.Sprintf("%s/test-repo-%d", cosignTempRegistry, rand.NewSource(time.Now().Unix()).Int63())
+	testImage := testRepo + "/alpine:3.10.2"
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
+		"docker://"+cosignPristineTestImage, "docker://"+testImage)
+
+	dir := t.TempDir()
+	sigPath := filepath.Join(dir, "sig")
+	setPath := filepath.Join(dir, "set")
+
+	cmd := exec.Command("cosign", "sign", "--key", keys.priv, "--tlog-upload", "--output-signature", sigPath, testImage)
+	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD=pass")
+	run(t, cmd)
+
+	imageDir := t.TempDir()
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
+
+	sigImageDir := t.TempDir()
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testRepo+"/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig", "dir:"+sigImageDir)
+	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
-	t.Logf("cosign-standalone-verify: %s", out)
+	sigSrc, err := sigRef.NewImageSource(context.Background(), nil)
+	require.NoError(t, err)
+	image, err := image.FromSource(context.Background(), nil, sigSrc)
+	require.NoError(t, err)
+	layers := image.LayerInfos()
+	require.NotEmpty(t, layers)
+	setBlob, ok := layers[0].Annotations["dev.sigstore.cosign/bundle"]
+	require.True(t, ok)
+	err = os.WriteFile(setPath, []byte(setBlob), 0600)
+	require.NoError(t, err)
+
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--require-rekor=true",
+		"--rekor-set", setPath, filepath.Join(imageDir, "manifest.json"),
+		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
 }
