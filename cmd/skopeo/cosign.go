@@ -11,7 +11,10 @@ import (
 )
 
 type cosignStandaloneVerifyOptions struct {
-	verification *cosignVerificationOptions
+	verification     *cosignVerificationOptions
+	rekorSETpath     string
+	embeddedCertPath string
+	certChainPath    string
 }
 
 func cosignStandaloneVerifyCmd() *cobra.Command {
@@ -28,6 +31,9 @@ func cosignStandaloneVerifyCmd() *cobra.Command {
 	adjustUsage(cmd)
 	flags := cmd.Flags()
 	flags.AddFlagSet(&verificationFlags)
+	flags.StringVar(&opts.rekorSETpath, "rekor-set", "", "validate a SET from `SET-PATH`")
+	flags.StringVar(&opts.embeddedCertPath, "embedded-cert", "", "`CERTIFICATE` is a part of the signature")
+	flags.StringVar(&opts.certChainPath, "cert-chain", "", "`CERT-CHAIN` can be used to validate the certificate")
 	return cmd
 }
 
@@ -52,11 +58,35 @@ func (opts *cosignStandaloneVerifyOptions) run(args []string, stdout io.Writer) 
 	if err != nil {
 		return fmt.Errorf("Error reading signature from %s: %w", signaturePath, err)
 	}
+	var unverifiedRekorSET []byte = nil
+	if opts.rekorSETpath != "" {
+		unverifiedRekorSET, err = os.ReadFile(opts.rekorSETpath)
+		if err != nil {
+			return fmt.Errorf("Error reading Rekor SET from %s: %w", opts.rekorSETpath, err)
+		}
+	}
+	var untrustedEmbeddedCert []byte = nil
+	if opts.embeddedCertPath != "" {
+		untrustedEmbeddedCert, err = os.ReadFile(opts.embeddedCertPath)
+		if err != nil {
+			return fmt.Errorf("Error reading embedded certificate from %s: %w", opts.embeddedCertPath, err)
+		}
+	}
+	var untrustedCertChain []byte = nil
+	if opts.certChainPath != "" {
+		untrustedCertChain, err = os.ReadFile(opts.certChainPath)
+		if err != nil {
+			return fmt.Errorf("Error reading certificate chain from %s: %w", opts.certChainPath, err)
+		}
+	}
 
 	// --- Set up the verification subject
 	unverifiedSignature := unverifiedSignatureData{
 		unverifiedPayload:         unverifiedPayload,
 		unverifiedBase64Signature: unverifiedBase64Signature,
+		unverifiedRekorSET:        unverifiedRekorSET,
+		untrustedEmbeddedCert:     untrustedEmbeddedCert,
+		untrustedCertChain:        untrustedCertChain,
 	}
 	unverifiedManifestDigest, err := manifest.Digest(unverifiedManifest)
 	if err != nil {
