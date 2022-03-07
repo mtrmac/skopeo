@@ -23,7 +23,8 @@ import (
 const cosignPristineTestImage = cosignTempRegistry + "/pristine/alpine:3.10.2"
 
 type keys struct {
-	pub, priv string
+	pub, priv  string
+	passphrase string
 }
 
 func run(t *testing.T, cmd *exec.Cmd) {
@@ -40,14 +41,16 @@ func runAndLogSkopeo(t *testing.T, args ...string) string {
 }
 
 func generateKeys(t *testing.T) keys {
+	passphrase := "pass"
 	dir := t.TempDir()
 	cmd := exec.Command("cosign", "generate-key-pair")
 	cmd.Dir = dir
-	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD=pass")
+	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD="+passphrase)
 	run(t, cmd)
 	return keys{
-		priv: filepath.Join(dir, "cosign.key"),
-		pub:  filepath.Join(dir, "cosign.pub"),
+		priv:       filepath.Join(dir, "cosign.key"),
+		pub:        filepath.Join(dir, "cosign.pub"),
+		passphrase: passphrase,
 	}
 }
 
@@ -79,7 +82,7 @@ func TestCosignStandaloneVerify(t *testing.T) {
 
 	sigPath := filepath.Join(dir, "sig")
 	cmd := exec.Command("cosign", "sign", "--tlog-upload=false", "--key", keys.priv, "--output-signature", sigPath, testImage)
-	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD=pass")
+	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD="+keys.passphrase)
 	run(t, cmd)
 	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
@@ -120,7 +123,7 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	setPath := filepath.Join(dir, "set")
 
 	cmd := exec.Command("cosign", "sign", "--key", keys.priv, "--tlog-upload", "--output-signature", sigPath, testImage)
-	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD=pass")
+	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD="+keys.passphrase)
 	run(t, cmd)
 	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
@@ -221,3 +224,33 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 }
 
 // FIXME: Test, or remove, the --ca mode
+
+func TestCosignStandaloneSign(t *testing.T) {
+	keys := generateKeys(t)
+
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, "manifest")
+	sigPath := filepath.Join(dir, "signature")
+	payloadPath := filepath.Join(dir, "payload")
+	passphrasePath := filepath.Join(dir, "pass")
+
+	ref, err := docker.ParseReference("//" + cosignPristineTestImage)
+	require.NoError(t, err)
+	src, err := ref.NewImageSource(context.Background(), &types.SystemContext{DockerInsecureSkipTLSVerify: types.OptionalBoolTrue})
+	require.NoError(t, err)
+	manifestBlob, _, err := src.GetManifest(context.Background(), nil)
+	require.NoError(t, err)
+	err = os.WriteFile(manifestPath, manifestBlob, 0o600)
+	require.NoError(t, err)
+
+	err = os.WriteFile(passphrasePath, []byte(keys.passphrase), 0o600)
+	require.NoError(t, err)
+	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage, keys.priv, "--key-passphrase-file", passphrasePath,
+		"--signature", sigPath, "--payload", payloadPath)
+
+	cmd := exec.Command("cosign", "verify-blob", "--key", keys.pub, "--signature", sigPath, payloadPath)
+	run(t, cmd)
+
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, manifestPath, "--require-rekor=false",
+		payloadPath, sigPath)
+}
