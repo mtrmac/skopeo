@@ -39,7 +39,7 @@ func cosignStandaloneVerifyCmd() *cobra.Command {
 
 func (opts *cosignStandaloneVerifyOptions) run(args []string, stdout io.Writer) error {
 	if len(args) != 3 {
-		return errors.New("Usage: skopeo cosign-standalone-verify --public-key ... manifest payload signature")
+		return errors.New("Usage: skopeo cosign-standalone-verify --public-key|--ca ...  manifest payload signature")
 	}
 	manifestPath := args[0]
 	payloadPath := args[1]
