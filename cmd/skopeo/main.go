@@ -109,6 +109,7 @@ func createApp() (*cobra.Command, *globalOptions) {
 		tagsCmd(&opts),
 		untrustedSignatureDumpCmd(),
 		cosignStandaloneVerifyCmd(),
+		cosignImageVerifyCmd(&opts),
 	)
 	return rootCommand, &opts
 }
