@@ -81,12 +81,13 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	cmd := exec.Command("cosign", "sign", "--tlog-upload=false", "--key", keys.priv, "--output-signature", sigPath, testImage)
 	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD=pass")
 	run(t, cmd)
+	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
 	imageDir := t.TempDir()
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
 
 	sigImageDir := t.TempDir()
-	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testRepo+"/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig", "dir:"+sigImageDir)
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
 	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
 	sigSrc, err := sigRef.NewImageSource(context.Background(), nil)
@@ -98,6 +99,8 @@ func TestCosignStandaloneVerify(t *testing.T) {
 
 	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--require-rekor=false",
 		filepath.Join(imageDir, "manifest.json"), filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
+	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--require-rekor=false",
+		filepath.Join(imageDir, "manifest.json"), sigImageRegistryRef)
 }
 
 // FIXME: Also c/image policy verification for interoperability, both ways.
@@ -119,12 +122,13 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	cmd := exec.Command("cosign", "sign", "--key", keys.priv, "--tlog-upload", "--output-signature", sigPath, testImage)
 	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD=pass")
 	run(t, cmd)
+	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
 	imageDir := t.TempDir()
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
 
 	sigImageDir := t.TempDir()
-	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testRepo+"/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig", "dir:"+sigImageDir)
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
 	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
 	sigSrc, err := sigRef.NewImageSource(context.Background(), nil)
@@ -141,6 +145,8 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--require-rekor=true",
 		"--rekor-set", setPath, filepath.Join(imageDir, "manifest.json"),
 		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
+	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--require-rekor=true",
+		filepath.Join(imageDir, "manifest.json"), sigImageRegistryRef)
 }
 
 func TestCosignFulcioRekorVerify(t *testing.T) {
@@ -173,12 +179,13 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 		err = cmd.Run()
 		require.NoError(t, err)
 	}()
+	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
 	imageDir := t.TempDir()
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
 
 	sigImageDir := t.TempDir()
-	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testRepo+"/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig", "dir:"+sigImageDir)
+	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
 	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
 	sigSrc, err := sigRef.NewImageSource(context.Background(), nil)
@@ -204,6 +211,13 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 		"--embedded-cert", certPath, "--cert-chain", chainPath, "--rekor-set", setPath,
 		filepath.Join(imageDir, "manifest.json"),
 		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
+	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false",
+		"--fulcio", "fixtures/fulcio_v1.crt.pem",
+		"--fulcio-issuer", "https://github.com/login/oauth",
+		"--fulcio-email", "mitr@redhat.com",
+		"--require-rekor=true",
+		filepath.Join(imageDir, "manifest.json"),
+		sigImageRegistryRef)
 }
 
 // FIXME: Test, or remove, the --ca mode

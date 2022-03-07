@@ -95,3 +95,85 @@ func (opts *cosignStandaloneVerifyOptions) run(args []string, stdout io.Writer) 
 
 	return opts.verification.runVerification(unverifiedManifestDigest, unverifiedSignature, stdout)
 }
+
+type cosignImageVerifyOptions struct {
+	global       *globalOptions
+	image        *imageOptions
+	verification *cosignVerificationOptions
+}
+
+func cosignImageVerifyCmd(global *globalOptions) *cobra.Command {
+	sharedFlags, sharedOpts := sharedImageFlags()
+	imageFlags, imageOpts := imageFlags(global, sharedOpts, nil, "", "")
+	verificationFlags, verificationOpts := cosignVerificationFlags()
+	opts := cosignImageVerifyOptions{
+		global:       global,
+		image:        imageOpts,
+		verification: verificationOpts,
+	}
+	// FIXME: Match the payload vs. the image (use the manifest.MatchesDigest)
+	cmd := &cobra.Command{
+		Use:   "cosign-image-verify MANIFEST IMAGE-NAME",
+		Short: "Verify a signature using local files",
+		RunE:  commandAction(opts.run),
+	}
+	adjustUsage(cmd)
+	flags := cmd.Flags()
+	flags.AddFlagSet(&sharedFlags)
+	flags.AddFlagSet(&imageFlags)
+	flags.AddFlagSet(&verificationFlags)
+	return cmd
+}
+
+func (opts *cosignImageVerifyOptions) run(args []string, stdout io.Writer) (retErr error) {
+	ctx, cancel := opts.global.commandTimeoutContext()
+	defer cancel()
+
+	if len(args) != 2 {
+		return errors.New("Usage: skopeo cosign-image-verify --public-key|--ca ...  manifest image-name")
+	}
+	manifestPath := args[0]
+	imageName := args[1]
+
+	// --- Load the verification subject
+	unverifiedManifest, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return fmt.Errorf("Error reading manifest from %s: %v", manifestPath, err)
+	}
+	unverifiedManifestDigest, err := manifest.Digest(unverifiedManifest)
+	if err != nil {
+		return fmt.Errorf("Error computing manifest digest: %w", err)
+	}
+	src, err := parseImageSource(ctx, opts.image, imageName)
+	if err != nil {
+		return fmt.Errorf("Error parsing image name %q: %w", imageName, err)
+	}
+	defer func() {
+		if err := src.Close(); err != nil {
+			retErr = fmt.Errorf("(could not close image: %v): %w", err, retErr)
+		}
+	}()
+
+	unverifiedSignatures, err := getSignaturesFromCosignImage(ctx, src)
+	if err != nil {
+		return fmt.Errorf("Error reading signatures: %w", err)
+	}
+
+	fmt.Fprintf(stdout, "=== %d signatures loaded\n", len(unverifiedSignatures))
+	failedSigs := 0
+	for i, unverifiedSignature := range unverifiedSignatures {
+		fmt.Fprintf(stdout, "=== VERIFYING signature %d/%d\n", i+1, len(unverifiedSignatures))
+		err := opts.verification.runVerification(unverifiedManifestDigest, unverifiedSignature, stdout)
+		if err == nil {
+			fmt.Fprintf(stdout, "... Overall: Succeeded\n")
+		} else {
+			fmt.Fprintf(stdout, "... Overall: FAILED: %v\n", err)
+			failedSigs++
+		}
+	}
+	if failedSigs != 0 {
+		// Just to make VERY sure this WIP code isn’t copy&pasted and failures end up being ignored
+		return fmt.Errorf("%d/%d signatures failed", failedSigs, len(unverifiedSignatures))
+	}
+	return nil
+}
