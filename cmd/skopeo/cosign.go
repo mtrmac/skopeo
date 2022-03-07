@@ -1,14 +1,126 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 
+	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/sigstore/cosign/v3/pkg/cosign"
+	"github.com/sigstore/sigstore/pkg/signature/payload"
 	"github.com/spf13/cobra"
+	"go.podman.io/image/v5/docker/reference"
 	"go.podman.io/image/v5/manifest"
+	"go.podman.io/image/v5/pkg/cli"
 )
+
+type cosignStandaloneSignOptions struct {
+	keyPassphrasePath string
+
+	payloadPath   string // Output payload path
+	signaturePath string // Output signature path
+}
+
+func cosignStandaloneSignCmd() *cobra.Command {
+	opts := cosignStandaloneSignOptions{}
+	cmd := &cobra.Command{
+		Use:   "cosign-standalone-sign [command options] MANIFEST DOCKER-REFERENCE PRIVATE-KEY --payload|-p PAYLOAD --signature|-s SIGNATURE",
+		Short: "Create a signature using local files",
+		RunE:  commandAction(opts.run),
+	}
+	adjustUsage(cmd)
+	flags := cmd.Flags()
+	flags.StringVar(&opts.keyPassphrasePath, "key-passphrase-file", "", "Read a passphrase for --key from `FILE`")
+	flags.StringVarP(&opts.signaturePath, "signature", "s", "", "output the signature to `SIGNATURE`")
+	flags.StringVarP(&opts.payloadPath, "payload", "p", "", "output the payload to `PAYLOAD`")
+	return cmd
+}
+
+func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) error {
+	if len(args) != 3 || opts.payloadPath == "" || opts.signaturePath == "" {
+		return errors.New("Usage: skopeo standalone-sign manifest docker-reference private-key -p payload -s signature")
+	}
+	manifestPath := args[0]
+	dockerReferenceString := args[1]
+	keyPath := args[2]
+
+	manifestBytes, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return fmt.Errorf("Error reading manifest from %s: %w", manifestPath, err)
+	}
+	dockerReference, err := reference.ParseNormalizedNamed(dockerReferenceString)
+	if err != nil {
+		return fmt.Errorf("Error parsing docker reference %q: %w", dockerReferenceString, err)
+	}
+
+	// FIXME: Support keyless signing
+
+	// github.com/sigstore/cosign/pkg/signature.SignerVerifierForKeyRef(ctx, keyRef, pf) includes support for pkcs11:, k8s://, gitlab (not even a colon!),
+	// and any other registered KMSes (at least awskms://, azurekms://, gcpkms://, hashivault://).
+	privateKeyPEM, err := os.ReadFile(keyPath)
+	if err != nil {
+		return fmt.Errorf("Error reading private key from %s: %w", keyPath, err)
+	}
+	var passphrase []byte
+	if opts.keyPassphrasePath != "" {
+		// Use the same format as simple signing’s --sign-passphrase-file .
+		// It’s not the only obvious choice; at least the consistency is valuable.
+		p, err := cli.ReadPassphraseFile(opts.keyPassphrasePath)
+		if err != nil {
+			return err
+		}
+		passphrase = []byte(p)
+	} else {
+		p, err := cosign.GetPassFromTerm(false)
+		if err != nil {
+			return fmt.Errorf("Error prompting for a passphrase: %w", err)
+		}
+		passphrase = p
+	}
+
+	signerVerifier, err := cosign.LoadPrivateKey(privateKeyPEM, passphrase)
+	if err != nil {
+		return fmt.Errorf("Error initializing private key: %w", err)
+	}
+
+	manifestDigest, err := manifest.Digest(manifestBytes)
+	if err != nil {
+		return fmt.Errorf("Error computing manifest digest: %w", err)
+	}
+
+	// FIXME FIXME: This generates an identity with only a repo name, not a tag
+	repoRef, err := name.NewRepository(dockerReference.Name(), name.StrictValidation)
+	if err != nil {
+		return fmt.Errorf("Error converting repository name %q: %w", dockerReference.Name(), err)
+	}
+	digestedRef := repoRef.Digest(manifestDigest.String())
+	payloadBytes, err := payload.Cosign{
+		Image:       digestedRef,
+		Annotations: nil,
+	}.MarshalJSON()
+	if err != nil {
+		return fmt.Errorf("Error creating payload to sign: %w", err)
+	}
+
+	// github.com/sigstore/cosign/internal/pkg/cosign.payloadSigner uses signatureoptions.WithContext(),
+	// which seems to be not used by anything. So we don’t bother.
+	signatureBytes, err := signerVerifier.SignMessage(bytes.NewReader(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("Error creating signature: %w", err)
+	}
+	base64Signature := base64.StdEncoding.EncodeToString(signatureBytes)
+
+	if err := os.WriteFile(opts.payloadPath, payloadBytes, 0644); err != nil {
+		return fmt.Errorf("Error writing payload to %s: %w", opts.payloadPath, err)
+	}
+	if err := os.WriteFile(opts.signaturePath, []byte(base64Signature), 0600); err != nil {
+		return fmt.Errorf("Error writing signature to %s: %w", opts.signaturePath, err)
+	}
+	return nil
+}
 
 type cosignStandaloneVerifyOptions struct {
 	verification     *cosignVerificationOptions
