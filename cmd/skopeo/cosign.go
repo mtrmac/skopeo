@@ -186,7 +186,7 @@ func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) er
 		// UI: At least Fulcio (together with Rekor?) should probably be configurable by pointing at a config file,
 		// the minimum set of options (issuer, client ID, possibly secret) is very unwieldy to type.
 		// FIXME: Should all of these be configurable?
-		fulcioTokenSourceMethod := 0 // FIXME FIXME: Do we want all of this?
+		fulcioTokenSourceMethod := 2 // FIXME FIXME: Do we want all of this?
 		fulcioIDToken := ""          // FIXME: Used for "token" method. FIXME: Make this configurable? Allow automatically loading it, per sigstore/cosign/pkg/providers?
 		fulcioOIDCClientSecret := "" // FIXME: Where does this come from?
 		var tokenGetter oauthflow.TokenGetter
