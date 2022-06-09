@@ -932,8 +932,8 @@ github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8
 github.com/fxamacker/cbor/v2 v2.7.0 h1:iM5WgngdRBanHcxugY4JySA0nk1wZorNOpTgCMedv5E=
 github.com/fxamacker/cbor/v2 v2.7.0/go.mod h1:pxXPTn3joSm21Gbwsv0w9OSA2y1HFR9qXEeXQVeNoDQ=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
-github.com/go-chi/chi v4.1.2+incompatible h1:fGFk2Gmi/YKXk0OmGfBh0WgmN3XB8lVnEyNz34tQRec=
-github.com/go-chi/chi v4.1.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
+github.com/go-chi/chi/v5 v5.2.2 h1:CMwsvRVTbXVytCk1Wd72Zy1LAsAh9GxMmSNWLHCG618=
+github.com/go-chi/chi/v5 v5.2.2/go.mod h1:L2yAIGWB3H+phAw1NxKwWM+7eUH/lU8pOMm5hHcoops=
 github.com/go-fonts/dejavu v0.1.0/go.mod h1:4Wt4I4OU2Nq9asgDCteaAaWZOV24E+0/Pwo0gppep4g=
 github.com/go-fonts/latin-modern v0.2.0/go.mod h1:rQVLdDMK+mK1xscDwsqM5J8U2jrRa3T0ecnM9pNujks=
 github.com/go-fonts/liberation v0.1.1/go.mod h1:K6qoJYypsmfVjWg8KOVDQhLc8UDgIK2HYqyqAO9z7GY=
@@ -1405,8 +1405,8 @@ github.com/sigstore/fulcio v1.7.2-0.20250804084259-5adfa90fca47 h1:7GH2DVpU+91Ut
 github.com/sigstore/fulcio v1.7.2-0.20250804084259-5adfa90fca47/go.mod h1:wswY7UYenGLdSlrZbnAl0niMmeqLDtG2NtUfl7XicHM=
 github.com/sigstore/protobuf-specs v0.5.1-0.20250806013055-d86eafd1253c h1:zlMbIwZwbzjOtQlGR2ljGgnWSnllvBslU4qGBCn7OsU=
 github.com/sigstore/protobuf-specs v0.5.1-0.20250806013055-d86eafd1253c/go.mod h1:+gXR+38nIa2oEupqDdzg4qSBT0Os+sP7oYv6alWewWc=
-github.com/sigstore/rekor v1.4.0 h1:K3DyH8309yzjYKUCQOVEIYpGp6Y9BQ8GpLhRj0D5CZk=
-github.com/sigstore/rekor v1.4.0/go.mod h1:teR57QMQA1nYXPoZL7o26Txky21RfWslM0E9w5Z57Ro=
+github.com/sigstore/rekor v1.4.1-0.20250807105650-2cbf2d6ed4fa h1:wE1ZAXhQnEtrlHEm9jflvGIrLrz2fWOspZImuHkB/kk=
+github.com/sigstore/rekor v1.4.1-0.20250807105650-2cbf2d6ed4fa/go.mod h1:/ndGsiuMB/E4D6GADlrS14KWknJY4+FcWeh7bHeoQNs=
 github.com/sigstore/rekor-tiles v0.1.7-0.20250806214916-af651a8d8d6c h1:BNwPV52eS/0mC8wxm4Cfh7hYmmnl5U4sCREHGbht3Xk=
 github.com/sigstore/rekor-tiles v0.1.7-0.20250806214916-af651a8d8d6c/go.mod h1:/LxR5mQIJsxSKgkAkiGlHxK9uds5SgG74ehgpn2XxpY=
 github.com/sigstore/sigstore v1.9.6-0.20250804233653-edd7f231f741 h1:9l/dX/MDt2rQZykcUEWf7fWz3RQVBVXQefUAfOBAveA=

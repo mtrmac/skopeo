@@ -12,6 +12,8 @@ require (
 	github.com/containers/ocicrypt v1.2.1
 	github.com/containers/storage v1.59.1
 	github.com/docker/distribution v2.8.3+incompatible
+	github.com/go-openapi/strfmt v0.23.0
+	github.com/go-openapi/swag v0.23.1
 	github.com/google/go-containerregistry v0.20.6
 	github.com/moby/sys/capability v0.4.0
 	github.com/opencontainers/go-digest v1.0.0
@@ -19,6 +21,7 @@ require (
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v2 v2.5.4-0.20250808152247-1059a8007c0d
 	github.com/sigstore/fulcio v1.7.2-0.20250804084259-5adfa90fca47
+	github.com/sigstore/rekor v1.4.1-0.20250807105650-2cbf2d6ed4fa
 	github.com/sigstore/sigstore v1.9.6-0.20250804233653-edd7f231f741
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
@@ -78,7 +81,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/go-chi/chi v4.1.2+incompatible // indirect
+	github.com/go-chi/chi/v5 v5.2.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -89,8 +92,6 @@ require (
 	github.com/go-openapi/loads v0.22.0 // indirect
 	github.com/go-openapi/runtime v0.28.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect
-	github.com/go-openapi/strfmt v0.23.0 // indirect
-	github.com/go-openapi/swag v0.23.1 // indirect
 	github.com/go-openapi/validate v0.24.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -150,7 +151,6 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/sigstore/protobuf-specs v0.5.1-0.20250806013055-d86eafd1253c // indirect
-	github.com/sigstore/rekor v1.4.0 // indirect
 	github.com/sigstore/rekor-tiles v0.1.7-0.20250806214916-af651a8d8d6c // indirect
 	github.com/sigstore/sigstore-go v1.1.1 // indirect
 	github.com/sigstore/timestamp-authority v1.2.9-0.20250808115758-5477dd6ab43a // indirect
