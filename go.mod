@@ -9,6 +9,8 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/containers/ocicrypt v1.2.1
 	github.com/docker/distribution v2.8.3+incompatible
+	github.com/go-openapi/strfmt v0.25.0
+	github.com/go-openapi/swag v0.25.3
 	github.com/google/go-containerregistry v0.20.6
 	github.com/moby/sys/capability v0.4.0
 	github.com/opencontainers/go-digest v1.0.0
@@ -16,6 +18,7 @@ require (
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v3 v3.0.3-0.20251124171734-7981e233ccfb
 	github.com/sigstore/fulcio v1.8.3-0.20251124034025-a4ee8608f034
+	github.com/sigstore/rekor v1.4.4-0.20251124151243-0cc6912b3616
 	github.com/sigstore/sigstore v1.10.1-0.20251124182647-c568f59ad7f0
 	github.com/sirupsen/logrus v1.9.4-0.20230606125235-dd1b4c2e81af
 	github.com/spf13/cobra v1.10.1
@@ -70,8 +73,6 @@ require (
 	github.com/go-openapi/loads v0.23.2 // indirect
 	github.com/go-openapi/runtime v0.29.2 // indirect
 	github.com/go-openapi/spec v0.22.1 // indirect
-	github.com/go-openapi/strfmt v0.25.0 // indirect
-	github.com/go-openapi/swag v0.25.3 // indirect
 	github.com/go-openapi/swag/cmdutils v0.25.3 // indirect
 	github.com/go-openapi/swag/conv v0.25.3 // indirect
 	github.com/go-openapi/swag/fileutils v0.25.3 // indirect
@@ -130,7 +131,6 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.9.1 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/sigstore/protobuf-specs v0.5.1-0.20251124075324-868c8d976f43 // indirect
-	github.com/sigstore/rekor v1.4.3 // indirect
 	github.com/sigstore/rekor-tiles/v2 v2.0.2-0.20251124152804-65abe0527c50 // indirect
 	github.com/sigstore/sigstore-go v1.1.4-0.20251124094504-b5fe07a5a7d7 // indirect
 	github.com/sigstore/timestamp-authority v1.2.9 // indirect

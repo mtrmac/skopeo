@@ -444,8 +444,8 @@ github.com/sigstore/fulcio v1.8.3-0.20251124034025-a4ee8608f034 h1:9gnkefIvemc/s
 github.com/sigstore/fulcio v1.8.3-0.20251124034025-a4ee8608f034/go.mod h1:5L+opf+QRoYkHmosptvQDBiOnSBw1OcSkpjA93gLYQg=
 github.com/sigstore/protobuf-specs v0.5.1-0.20251124075324-868c8d976f43 h1:dEY7ckyfr/d9XXAuQzMRcDRfpfZFxgF8X5Z+lG39R28=
 github.com/sigstore/protobuf-specs v0.5.1-0.20251124075324-868c8d976f43/go.mod h1:4uStRG7Klw8I2gR9I3P+iBlBf0vvYyWPoqWWKcuGnk8=
-github.com/sigstore/rekor v1.4.3 h1:2+aw4Gbgumv8vYM/QVg6b+hvr4x4Cukur8stJrVPKU0=
-github.com/sigstore/rekor v1.4.3/go.mod h1:o0zgY087Q21YwohVvGwV9vK1/tliat5mfnPiVI3i75o=
+github.com/sigstore/rekor v1.4.4-0.20251124151243-0cc6912b3616 h1:CUd3XpYSxvXfq7IEd/5dPXuTUpLIIFkbJ956JV2tDJE=
+github.com/sigstore/rekor v1.4.4-0.20251124151243-0cc6912b3616/go.mod h1:E9FE9MRhzL8dpv7uMO5caxGcxPNV9L5UvTegfu40MmA=
 github.com/sigstore/rekor-tiles/v2 v2.0.2-0.20251124152804-65abe0527c50 h1:zBUIs9faidPw4B+QlT/HoSz9G3zjmszL+Sp6NGoRBUI=
 github.com/sigstore/rekor-tiles/v2 v2.0.2-0.20251124152804-65abe0527c50/go.mod h1:sUD9n/rj56BluDUVrMJBwk5W0/LeGtOtKUDGYrzp5O0=
 github.com/sigstore/sigstore v1.10.1-0.20251124182647-c568f59ad7f0 h1:L5HvS/fQN/kZTRCWjJp4v6fP6ib0/R1Xqp7eeIb0WkI=

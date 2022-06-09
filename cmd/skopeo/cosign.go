@@ -39,6 +39,10 @@ const (
 	// practical due to the amount of dependencies it adds.
 	defaultFulcioOIDCIssuerURL = "https://oauth2.sigstore.dev/auth"
 	defaultFulcioOIDCClientID  = "sigstore"
+	// FIXME: This is also available as
+	// github.com/sigstore/cosign/cmd/cosign/cli/options.DefaultRekorURL, but that is not
+	// practical due to the amount of dependencies it adds.
+	defaultRekorURL = "https://rekor.sigstore.dev"
 )
 
 type cosignStandaloneSignOptions struct {
@@ -479,6 +483,73 @@ func (opts *cosignImageVerifyOptions) run(args []string, stdout io.Writer) (retE
 	if failedSigs != 0 {
 		// Just to make VERY sure this WIP code isn’t copy&pasted and failures end up being ignored
 		return fmt.Errorf("%d/%d signatures failed", failedSigs, len(unverifiedSignatures))
+	}
+	return nil
+}
+
+type cosignStandaloneRekorUploadOptions struct {
+	global  *globalOptions
+	upload  *cosignRekorUploadOptions
+	setPath string
+}
+
+func cosignRekorUpload(global *globalOptions) *cobra.Command {
+	uploadFlags, uploadOpts := cosignRekorUploadFlags()
+	opts := cosignStandaloneRekorUploadOptions{
+		global: global,
+		upload: uploadOpts,
+	}
+	cmd := &cobra.Command{
+		Use:   "cosign-rekor-upload KEY-OR-CERT SIGNATURE PAYLOAD -o SET",
+		Short: "",
+		RunE:  commandAction(opts.run),
+	}
+	adjustUsage(cmd)
+	flags := cmd.Flags()
+	flags.AddFlagSet(&uploadFlags)
+	flags.StringVarP(&opts.setPath, "output", "o", "", "Write the SET to `SET-PATH`")
+	return cmd
+}
+
+func (opts *cosignStandaloneRekorUploadOptions) run(args []string, stdout io.Writer) error {
+	ctx, cancel := opts.global.commandTimeoutContext()
+	defer cancel()
+
+	if len(args) != 3 || opts.setPath == "" {
+		return errors.New("Usage: skopeo cosign-rekor-upload key-or-cert signature payload -o set")
+	}
+	keyOrCertPath := args[0]
+	signaturePath := args[1]
+	payloadPath := args[2]
+
+	// -- Set up the subject to upload
+	keyOrCertBytes, err := os.ReadFile(keyOrCertPath)
+	if err != nil {
+		return fmt.Errorf("Error reading key-or-cert from %s: %w", keyOrCertPath, err)
+	}
+	base64Signature, err := os.ReadFile(signaturePath)
+	if err != nil {
+		return fmt.Errorf("Error reading signature from %s: %w", signaturePath, err)
+	}
+	payloadBytes, err := os.ReadFile(payloadPath)
+	if err != nil {
+		return fmt.Errorf("Error reading payload from %s: %w", payloadPath, err)
+	}
+
+	// Prepare contents
+	signatureBytes, err := base64.StdEncoding.DecodeString(string(base64Signature)) // Ultimately this shouldn’t be necessary.
+	if err != nil {
+		return fmt.Errorf("Error decoding signature: %w", err)
+	}
+	// Cosign goes through an unmarshal/marshal roundtrip for Fulcio-generated certificates, let’s not.
+	// NOTE: For a caller-provided private key, we might need to extract the public key and marshal here, for convenience.
+
+	rekorSET, err := opts.upload.uploadEntry(ctx, keyOrCertBytes, signatureBytes, payloadBytes)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(opts.setPath, []byte(rekorSET), 0644); err != nil {
+		return fmt.Errorf("Error writing SET to %s: %w", opts.setPath, err)
 	}
 	return nil
 }
