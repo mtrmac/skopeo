@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"go.podman.io/image/v5/manifest"
 )
 
 type cosignStandaloneVerifyOptions struct {
@@ -20,7 +21,7 @@ func cosignStandaloneVerifyCmd() *cobra.Command {
 	}
 	// FIXME: Match the payload vs. the image (use the manifest.MatchesDigest)
 	cmd := &cobra.Command{
-		Use:   "cosign-standalone-verify PAYLOAD SIGNATURE",
+		Use:   "cosign-standalone-verify MANIFEST PAYLOAD SIGNATURE",
 		Short: "Verify a signature using local files",
 		RunE:  commandAction(opts.run),
 	}
@@ -31,13 +32,18 @@ func cosignStandaloneVerifyCmd() *cobra.Command {
 }
 
 func (opts *cosignStandaloneVerifyOptions) run(args []string, stdout io.Writer) error {
-	if len(args) != 2 {
-		return errors.New("Usage: skopeo cosign-standalone-verify --public-key ... payload signature")
+	if len(args) != 3 {
+		return errors.New("Usage: skopeo cosign-standalone-verify --public-key ... manifest payload signature")
 	}
-	payloadPath := args[0]
-	signaturePath := args[1]
+	manifestPath := args[0]
+	payloadPath := args[1]
+	signaturePath := args[2]
 
 	// --- Load the verification subject
+	unverifiedManifest, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return fmt.Errorf("Error reading manifest from %s: %v", manifestPath, err)
+	}
 	unverifiedPayload, err := os.ReadFile(payloadPath)
 	if err != nil {
 		return fmt.Errorf("Error reading payload from %s: %w", payloadPath, err)
@@ -52,6 +58,10 @@ func (opts *cosignStandaloneVerifyOptions) run(args []string, stdout io.Writer) 
 		unverifiedPayload:         unverifiedPayload,
 		unverifiedBase64Signature: unverifiedBase64Signature,
 	}
+	unverifiedManifestDigest, err := manifest.Digest(unverifiedManifest)
+	if err != nil {
+		return fmt.Errorf("Error computing manifest digest: %w", err)
+	}
 
-	return opts.verification.runVerification(unverifiedSignature, stdout)
+	return opts.verification.runVerification(unverifiedManifestDigest, unverifiedSignature, stdout)
 }
