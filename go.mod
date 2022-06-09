@@ -13,12 +13,15 @@ require (
 	github.com/containers/ocicrypt v1.1.10
 	github.com/containers/storage v1.54.0
 	github.com/docker/distribution v2.8.3+incompatible
+	github.com/go-openapi/strfmt v0.23.0
+	github.com/go-openapi/swag v0.23.0
 	github.com/google/go-containerregistry v0.19.1
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v2 v2.2.5-0.20240603171136-d275a272ec0c
 	github.com/sigstore/fulcio v1.4.6-0.20240603172628-728a6bb4c029
+	github.com/sigstore/rekor v1.3.7-0.20240605204705-d43e7129e22b
 	github.com/sigstore/sigstore v1.8.5-0.20240604072358-4cfbe93da92a
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
@@ -71,8 +74,6 @@ require (
 	github.com/go-openapi/loads v0.22.0 // indirect
 	github.com/go-openapi/runtime v0.28.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect
-	github.com/go-openapi/strfmt v0.23.0 // indirect
-	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-openapi/validate v0.24.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -85,7 +86,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.6 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/hashicorp/hcl v1.0.1-vault-5 // indirect
 	github.com/in-toto/in-toto-golang v0.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -127,7 +128,6 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/sigstore/rekor v1.3.6 // indirect
 	github.com/sigstore/timestamp-authority v1.2.3-0.20240606114141-67a6797d7bff // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect

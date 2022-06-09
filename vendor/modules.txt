@@ -426,7 +426,7 @@ github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-multierror v1.1.1
 ## explicit; go 1.13
 github.com/hashicorp/go-multierror
-# github.com/hashicorp/go-retryablehttp v0.7.6
+# github.com/hashicorp/go-retryablehttp v0.7.7
 ## explicit; go 1.19
 github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/hcl v1.0.1-vault-5
@@ -626,7 +626,7 @@ github.com/sigstore/cosign/v2/pkg/types
 ## explicit; go 1.21.9
 github.com/sigstore/fulcio/pkg/api
 github.com/sigstore/fulcio/pkg/certificate
-# github.com/sigstore/rekor v1.3.6
+# github.com/sigstore/rekor v1.3.7-0.20240605204705-d43e7129e22b
 ## explicit; go 1.21
 github.com/sigstore/rekor/pkg/client
 github.com/sigstore/rekor/pkg/generated/client
