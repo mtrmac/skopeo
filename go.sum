@@ -440,8 +440,8 @@ github.com/shibumi/go-pathspec v1.3.0 h1:QUyMZhFo0Md5B8zV8x2tesohbb5kfbpTi9rBnKh
 github.com/shibumi/go-pathspec v1.3.0/go.mod h1:Xutfslp817l2I1cZvgcfeMQJG5QnU2lh5tVaaMCl3jE=
 github.com/sigstore/cosign/v3 v3.0.3-0.20251124171734-7981e233ccfb h1:4pjIOb4cBCWPwJ2i5MIpxiaBKq7pxw4Mp5+vHpYsGo8=
 github.com/sigstore/cosign/v3 v3.0.3-0.20251124171734-7981e233ccfb/go.mod h1:teo4EZdI9JQhNXuzY1agNwzRrsfY4CVBCiZ6Zl9LOUE=
-github.com/sigstore/fulcio v1.8.1 h1:PmoQv3XmhjR2BWFWw5LcMUXJPmhyizOIL7HeYnpio58=
-github.com/sigstore/fulcio v1.8.1/go.mod h1:7tP3KW9eCGlPYRj5N4MSuUOat7CkeIHuXZ2jAUQ+Rwc=
+github.com/sigstore/fulcio v1.8.3-0.20251124034025-a4ee8608f034 h1:9gnkefIvemc/s3lEp9zLpBJSXI0ya+f6VYktY0c5pUQ=
+github.com/sigstore/fulcio v1.8.3-0.20251124034025-a4ee8608f034/go.mod h1:5L+opf+QRoYkHmosptvQDBiOnSBw1OcSkpjA93gLYQg=
 github.com/sigstore/protobuf-specs v0.5.1-0.20251124075324-868c8d976f43 h1:dEY7ckyfr/d9XXAuQzMRcDRfpfZFxgF8X5Z+lG39R28=
 github.com/sigstore/protobuf-specs v0.5.1-0.20251124075324-868c8d976f43/go.mod h1:4uStRG7Klw8I2gR9I3P+iBlBf0vvYyWPoqWWKcuGnk8=
 github.com/sigstore/rekor v1.4.3 h1:2+aw4Gbgumv8vYM/QVg6b+hvr4x4Cukur8stJrVPKU0=

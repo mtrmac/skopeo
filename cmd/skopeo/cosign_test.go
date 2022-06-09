@@ -245,7 +245,8 @@ func TestCosignStandaloneSign(t *testing.T) {
 
 	err = os.WriteFile(passphrasePath, []byte(keys.passphrase), 0o600)
 	require.NoError(t, err)
-	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage, keys.priv, "--key-passphrase-file", passphrasePath,
+	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage,
+		"--key", keys.priv, "--key-passphrase-file", passphrasePath,
 		"--signature", sigPath, "--payload", payloadPath)
 
 	cmd := exec.Command("cosign", "verify-blob", "--key", keys.pub, "--signature", sigPath, payloadPath)
@@ -254,3 +255,47 @@ func TestCosignStandaloneSign(t *testing.T) {
 	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, manifestPath, "--require-rekor=false",
 		payloadPath, sigPath)
 }
+
+func TestCosignStandaloneFulcioSign(t *testing.T) {
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, "manifest")
+	sigPath := filepath.Join(dir, "signature")
+	payloadPath := filepath.Join(dir, "payload")
+	certPath := filepath.Join(dir, "cert")
+	chainPath := filepath.Join(dir, "chain")
+
+	ref, err := docker.ParseReference("//" + cosignPristineTestImage)
+	require.NoError(t, err)
+	src, err := ref.NewImageSource(context.Background(), &types.SystemContext{DockerInsecureSkipTLSVerify: types.OptionalBoolTrue})
+	require.NoError(t, err)
+	manifestBlob, _, err := src.GetManifest(context.Background(), nil)
+	require.NoError(t, err)
+	err = os.WriteFile(manifestPath, manifestBlob, 0o600)
+	require.NoError(t, err)
+
+	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage,
+		"--fulcio-default", "--certificate", certPath, "--certificate-chain", chainPath,
+		"--signature", sigPath, "--payload", payloadPath)
+
+	if false {
+		// FIXME: "--insecure-skip-tlog-verify" is just not hooked up as of 8d2a1a6e16f0375c05314481206cc591c51c041e
+		cmd := exec.Command("cosign", "verify-blob", "--certificate", certPath, "--certificate-chain", chainPath,
+			"--certificate-oidc-issuer", "https://github.com/login/oauth",
+			"--certificate-email", "mitr@redhat.com",
+			"--verbose",
+			"--insecure-skip-tlog-verify", // FIXME: No Rekor requirement yet
+			"--signature", sigPath, payloadPath)
+		run(t, cmd)
+	}
+
+	runAndLogSkopeo(t, "cosign-standalone-verify",
+		"--fulcio", "fixtures/fulcio_v1.crt.pem",
+		"--fulcio-issuer", "https://github.com/login/oauth",
+		"--fulcio-email", "mitr@redhat.com",
+		// FIXME: Also upload to Rekor, and verifys that
+		"--require-rekor=false",
+		"--embedded-cert", certPath, "--cert-chain", chainPath,
+		manifestPath, payloadPath, sigPath)
+}
+
+// TO DO: Fulcio sign + Rekor upload, as an image

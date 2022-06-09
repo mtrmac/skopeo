@@ -487,8 +487,8 @@ github.com/sigstore/cosign/v3/pkg/oci/remote
 github.com/sigstore/cosign/v3/pkg/oci/signed
 github.com/sigstore/cosign/v3/pkg/oci/static
 github.com/sigstore/cosign/v3/pkg/types
-# github.com/sigstore/fulcio v1.8.1
-## explicit; go 1.24.6
+# github.com/sigstore/fulcio v1.8.3-0.20251124034025-a4ee8608f034
+## explicit; go 1.25.0
 github.com/sigstore/fulcio/pkg/api
 github.com/sigstore/fulcio/pkg/certificate
 # github.com/sigstore/protobuf-specs v0.5.1-0.20251124075324-868c8d976f43
