@@ -239,6 +239,42 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 
 // FIXME: Test, or remove, the --ca mode
 
+func TestCosignRekorUpload(t *testing.T) {
+	ensureTestImage(t)
+
+	keys := generateKeys(t)
+
+	dir := tempDir(t)
+	manifestPath := filepath.Join(dir, "manifest")
+	sigPath := filepath.Join(dir, "signature")
+	payloadPath := filepath.Join(dir, "payload")
+	passphrasePath := filepath.Join(dir, "pass")
+	setPath := filepath.Join(dir, "set")
+
+	ref, err := docker.ParseReference("//" + cosignPristineTestImage)
+	require.NoError(t, err)
+	src, err := ref.NewImageSource(context.Background(), &types.SystemContext{DockerInsecureSkipTLSVerify: types.OptionalBoolTrue})
+	require.NoError(t, err)
+	manifestBlob, _, err := src.GetManifest(context.Background(), nil)
+	require.NoError(t, err)
+	err = os.WriteFile(manifestPath, manifestBlob, 0o600)
+	require.NoError(t, err)
+
+	err = os.WriteFile(passphrasePath, []byte(keys.passphrase), 0o600)
+	require.NoError(t, err)
+	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage,
+		"--key", keys.priv, "--key-passphrase-file", passphrasePath,
+		"--signature", sigPath, "--payload", payloadPath)
+	runAndLogSkopeo(t, "cosign-rekor-upload", "--rekor-default",
+		keys.pub, sigPath, payloadPath, "-o", setPath)
+
+	cmd := exec.Command("cosign", "verify-blob", "--key", keys.pub, "--signature", sigPath, "--bundle", setPath, payloadPath)
+	run(t, cmd)
+
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, manifestPath, "--require-rekor=true",
+		"--rekor-set", setPath, payloadPath, sigPath)
+}
+
 func TestCosignStandaloneSign(t *testing.T) {
 	keys := generateKeys(t)
 

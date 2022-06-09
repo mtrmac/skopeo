@@ -12,6 +12,8 @@ require (
 	github.com/containers/ocicrypt v1.2.0
 	github.com/containers/storage v1.56.0
 	github.com/docker/distribution v2.8.3+incompatible
+	github.com/go-openapi/strfmt v0.23.0
+	github.com/go-openapi/swag v0.23.0
 	github.com/google/go-containerregistry v0.20.2
 	github.com/moby/sys/capability v0.4.0
 	github.com/opencontainers/go-digest v1.0.0
@@ -19,6 +21,7 @@ require (
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v2 v2.4.2-0.20241125184434-e7667bd9d71d
 	github.com/sigstore/fulcio v1.6.6-0.20241125092802-e585b021a1e4
+	github.com/sigstore/rekor v1.3.8-0.20241125120603-4fcb4d401ccf
 	github.com/sigstore/sigstore v1.8.11-0.20241126110922-8041744654c9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
@@ -72,8 +75,6 @@ require (
 	github.com/go-openapi/loads v0.22.0 // indirect
 	github.com/go-openapi/runtime v0.28.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect
-	github.com/go-openapi/strfmt v0.23.0 // indirect
-	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-openapi/validate v0.24.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -130,7 +131,6 @@ require (
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/sigstore/protobuf-specs v0.3.3-0.20241125091137-5c7682fdcbcf // indirect
-	github.com/sigstore/rekor v1.3.6 // indirect
 	github.com/sigstore/timestamp-authority v1.2.4-0.20241122161250-c69c063685ad // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
@@ -161,7 +161,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.29.0 // indirect
-	golang.org/x/mod v0.21.0 // indirect
+	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/net v0.31.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.9.0 // indirect
