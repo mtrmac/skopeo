@@ -622,8 +622,8 @@ github.com/sigstore/cosign/v2/pkg/oci/remote
 github.com/sigstore/cosign/v2/pkg/oci/signed
 github.com/sigstore/cosign/v2/pkg/oci/static
 github.com/sigstore/cosign/v2/pkg/types
-# github.com/sigstore/fulcio v1.4.5
-## explicit; go 1.21
+# github.com/sigstore/fulcio v1.4.6-0.20240701160145-07b19da442b4
+## explicit; go 1.22.4
 github.com/sigstore/fulcio/pkg/api
 github.com/sigstore/fulcio/pkg/certificate
 # github.com/sigstore/rekor v1.3.6
