@@ -1,9 +1,7 @@
 module github.com/containers/skopeo
 
 // Minimum required golang version
-go 1.22.7
-
-toolchain go1.23.1
+go 1.23.1
 
 // Warning: Ensure the "go" and "toolchain" versions match exactly to prevent unwanted auto-updates
 
@@ -19,6 +17,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v2 v2.4.1-0.20240918204743-43933130d2ca
+	github.com/sigstore/fulcio v1.6.5-0.20240911161758-f019ef6cf644
 	github.com/sigstore/sigstore v1.8.10-0.20240910010512-745a80351bca
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
@@ -127,7 +126,6 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/sigstore/fulcio v1.6.3 // indirect
 	github.com/sigstore/protobuf-specs v0.3.3-0.20240918071838-947e082c7377 // indirect
 	github.com/sigstore/rekor v1.3.6 // indirect
 	github.com/sigstore/timestamp-authority v1.2.3-0.20240919115605-4253b6558a79 // indirect

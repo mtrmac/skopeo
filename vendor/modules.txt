@@ -620,8 +620,8 @@ github.com/sigstore/cosign/v2/pkg/oci/remote
 github.com/sigstore/cosign/v2/pkg/oci/signed
 github.com/sigstore/cosign/v2/pkg/oci/static
 github.com/sigstore/cosign/v2/pkg/types
-# github.com/sigstore/fulcio v1.6.3
-## explicit; go 1.22.5
+# github.com/sigstore/fulcio v1.6.5-0.20240911161758-f019ef6cf644
+## explicit; go 1.23.1
 github.com/sigstore/fulcio/pkg/api
 github.com/sigstore/fulcio/pkg/certificate
 # github.com/sigstore/protobuf-specs v0.3.3-0.20240918071838-947e082c7377
