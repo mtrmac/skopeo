@@ -12,12 +12,15 @@ require (
 	github.com/containers/ocicrypt v1.2.0
 	github.com/containers/storage v1.55.0
 	github.com/docker/distribution v2.8.3+incompatible
+	github.com/go-openapi/strfmt v0.23.0
+	github.com/go-openapi/swag v0.23.0
 	github.com/google/go-containerregistry v0.20.2
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v2 v2.4.1-0.20240918204743-43933130d2ca
 	github.com/sigstore/fulcio v1.6.5-0.20240911161758-f019ef6cf644
+	github.com/sigstore/rekor v1.3.7-0.20240902143731-2e4be8b5a83b
 	github.com/sigstore/sigstore v1.8.10-0.20240910010512-745a80351bca
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
@@ -70,8 +73,6 @@ require (
 	github.com/go-openapi/loads v0.22.0 // indirect
 	github.com/go-openapi/runtime v0.28.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect
-	github.com/go-openapi/strfmt v0.23.0 // indirect
-	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-openapi/validate v0.24.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -127,7 +128,6 @@ require (
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/sigstore/protobuf-specs v0.3.3-0.20240918071838-947e082c7377 // indirect
-	github.com/sigstore/rekor v1.3.6 // indirect
 	github.com/sigstore/timestamp-authority v1.2.3-0.20240919115605-4253b6558a79 // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
