@@ -580,8 +580,8 @@ github.com/sigstore/cosign/v2 v2.2.5-0.20240625170710-7c20052077a8 h1:MCphQveNNb
 github.com/sigstore/cosign/v2 v2.2.5-0.20240625170710-7c20052077a8/go.mod h1:q5S1WlG9CRb0+fRBDisfvbdGl9iX7OEEa2KEXj7iZd0=
 github.com/sigstore/fulcio v1.4.6-0.20240701160145-07b19da442b4 h1:PJyiY1MRtcDusMq68V2vRPTiuVbe2ndw8VtDplJ4q/Q=
 github.com/sigstore/fulcio v1.4.6-0.20240701160145-07b19da442b4/go.mod h1:hJR8TxmgAUzhie/5rt+eQG7p0bfISmgOEf7xO3PXrTY=
-github.com/sigstore/rekor v1.3.6 h1:QvpMMJVWAp69a3CHzdrLelqEqpTM3ByQRt5B5Kspbi8=
-github.com/sigstore/rekor v1.3.6/go.mod h1:JDTSNNMdQ/PxdsS49DJkJ+pRJCO/83nbR5p3aZQteXc=
+github.com/sigstore/rekor v1.3.7-0.20240627083500-5fd171152c26 h1:HznAlC/g9sV8JRq8wFrg5S/OPxfCIlg/wqJ25OA7A1E=
+github.com/sigstore/rekor v1.3.7-0.20240627083500-5fd171152c26/go.mod h1:5fLkCguXZGLKQjDLBefufrIkIoROMrt5FLzt3VHwy8Y=
 github.com/sigstore/sigstore v1.8.6 h1:g066b/Nw5r5oxhNv4XqJUUzVcyf1b07itUueiQe7rZM=
 github.com/sigstore/sigstore v1.8.6/go.mod h1:UOBrJd9JBQ81DrkpGljzsIFXEtfC30raHvLWFWG857U=
 github.com/sigstore/sigstore/pkg/signature/kms/aws v1.8.6 h1:uVcT1JT4lLkmBQII25PvgP/nyvi4HvTMNXzoHqQqEHE=
