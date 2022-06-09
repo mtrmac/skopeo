@@ -20,6 +20,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v2 v2.4.4-0.20250307183049-e6a9c3619d54
+	github.com/sigstore/fulcio v1.6.7-0.20250303074149-1a642e565a76
 	github.com/sigstore/sigstore v1.9.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
@@ -130,7 +131,6 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/sigstore/fulcio v1.6.6 // indirect
 	github.com/sigstore/protobuf-specs v0.4.1-0.20250302221334-3e6d8c8ec8a0 // indirect
 	github.com/sigstore/rekor v1.3.9 // indirect
 	github.com/sigstore/sigstore-go v0.7.1-0.20250227160137-693bbb25c340 // indirect

@@ -380,8 +380,8 @@ github.com/googleapis/gax-go/v2 v2.14.1/go.mod h1:Hb/NubMaVM88SrNkvl8X/o8XWwDJEP
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
 github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0 h1:gmcG1KaJ57LophUzW0Hy8NmPhnMZb4M0+kPpLofRdBo=
-github.com/grpc-ecosystem/grpc-gateway/v2 v2.25.1 h1:VNqngBF40hVlDloBruUehVYC3ArSgIyScOAyMRqBxRg=
-github.com/grpc-ecosystem/grpc-gateway/v2 v2.25.1/go.mod h1:RBRO7fro65R6tjKzYgLAFo0t1QEXY1Dp+i/bvpRiqiQ=
+github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.0 h1:VD1gqscl4nYs1YxVuSdemTrSgTKrwOWDK0FVFMqm+Cg=
+github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.0/go.mod h1:4EgsQoS4TOhJizV+JTFg40qx1Ofh3XmXEQNBpgvNT40=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
@@ -601,8 +601,8 @@ github.com/shurcooL/sanitized_anchor_name v1.0.0 h1:PdmoCO6wvbs+7yrJyMORt4/BmY5I
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/sigstore/cosign/v2 v2.4.4-0.20250307183049-e6a9c3619d54 h1:X75vjAiR3vWeVdUC3h+z/CRciSLtjNiP+kqbvoaksnM=
 github.com/sigstore/cosign/v2 v2.4.4-0.20250307183049-e6a9c3619d54/go.mod h1:wIqDMdFRse4ryRuhSuutKBYtYYqS6DnNnJMbqkRScCg=
-github.com/sigstore/fulcio v1.6.6 h1:XaMYX6TNT+8n7Npe8D94nyZ7/ERjEsNGFC+REdi/wzw=
-github.com/sigstore/fulcio v1.6.6/go.mod h1:BhQ22lwaebDgIxVBEYOOqLRcN5+xOV+C9bh/GUXRhOk=
+github.com/sigstore/fulcio v1.6.7-0.20250303074149-1a642e565a76 h1:4DvFVMg6ag76xw7ZvB8R2HdQzlR5+32W65+cZiZBWuk=
+github.com/sigstore/fulcio v1.6.7-0.20250303074149-1a642e565a76/go.mod h1:Z/aUOQaa4TT90KxTbIU5ArYjaPxjcLpvaYCPNhihFyE=
 github.com/sigstore/protobuf-specs v0.4.1-0.20250302221334-3e6d8c8ec8a0 h1:v/9AkvGWPRfAfI4Tb20Wwv0660cqQ6Cg7BT6yEzygNo=
 github.com/sigstore/protobuf-specs v0.4.1-0.20250302221334-3e6d8c8ec8a0/go.mod h1:rdB1RI3KV/DEFKhVFl4zpA3sntKhpj8MJhT6HtZIS6U=
 github.com/sigstore/rekor v1.3.9 h1:sUjRpKVh/hhgqGMs0t+TubgYsksArZ6poLEC3MsGAzU=
