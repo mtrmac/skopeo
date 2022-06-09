@@ -582,8 +582,8 @@ github.com/sigstore/fulcio v1.5.2-0.20240725223755-9acf0762233a h1:AYov9gk9gnOk9
 github.com/sigstore/fulcio v1.5.2-0.20240725223755-9acf0762233a/go.mod h1:qDiiCFGl2BsNwUIpVphHnj7MGsg8yxJl1GShS0YzD44=
 github.com/sigstore/protobuf-specs v0.3.3-0.20240723142623-92dc2e454083 h1:wIj47oUhaWQSA35o9gS/kUhZ777gvYh1npBuEgj2/lU=
 github.com/sigstore/protobuf-specs v0.3.3-0.20240723142623-92dc2e454083/go.mod h1:riEEY5Xky1Ksr6jahPhIqvT6vbKrEINIjP2GxV67dXY=
-github.com/sigstore/rekor v1.3.6 h1:QvpMMJVWAp69a3CHzdrLelqEqpTM3ByQRt5B5Kspbi8=
-github.com/sigstore/rekor v1.3.6/go.mod h1:JDTSNNMdQ/PxdsS49DJkJ+pRJCO/83nbR5p3aZQteXc=
+github.com/sigstore/rekor v1.3.7-0.20240716075507-120cebd25a2b h1:xLcIvR5LjhLXBmBaGloia9ezBt8jSvLyAawEqLjiPJA=
+github.com/sigstore/rekor v1.3.7-0.20240716075507-120cebd25a2b/go.mod h1:9v6s64CaUHQh8O6knGNR1D6GOHf0PjP4BUGKdhO0fFo=
 github.com/sigstore/sigstore v1.8.8-0.20240724144109-81474dc8a55d h1:eSrL7e9fEvghr0FYAOlwCrFVNkQGWXuogSDalYkReqg=
 github.com/sigstore/sigstore v1.8.8-0.20240724144109-81474dc8a55d/go.mod h1:KKnPU6FW33LfB7YB9kMmTRAimustfkTT3JhBjI+9psM=
 github.com/sigstore/sigstore/pkg/signature/kms/aws v1.8.7 h1:SoahswHQm2JhO8h3KTAeX8IZeE7mSR2Lc53ay5choes=
