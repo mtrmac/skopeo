@@ -303,7 +303,7 @@ github.com/dustin/go-humanize
 # github.com/felixge/httpsnoop v1.0.4
 ## explicit; go 1.13
 github.com/felixge/httpsnoop
-# github.com/fsnotify/fsnotify v1.8.0
+# github.com/fsnotify/fsnotify v1.9.0
 ## explicit; go 1.17
 github.com/fsnotify/fsnotify
 github.com/fsnotify/fsnotify/internal
@@ -311,8 +311,8 @@ github.com/fsnotify/fsnotify/internal
 ## explicit
 github.com/go-chi/chi
 github.com/go-chi/chi/middleware
-# github.com/go-jose/go-jose/v4 v4.0.5
-## explicit; go 1.21
+# github.com/go-jose/go-jose/v4 v4.1.0
+## explicit; go 1.24
 github.com/go-jose/go-jose/v4
 github.com/go-jose/go-jose/v4/cipher
 github.com/go-jose/go-jose/v4/json
@@ -398,7 +398,7 @@ github.com/google/certificate-transparency-go/tls
 github.com/google/certificate-transparency-go/x509
 github.com/google/certificate-transparency-go/x509/pkix
 github.com/google/certificate-transparency-go/x509util
-# github.com/google/go-containerregistry v0.20.3
+# github.com/google/go-containerregistry v0.20.4-0.20250225234217-098045d5e61f
 ## explicit; go 1.23.0
 github.com/google/go-containerregistry/internal/and
 github.com/google/go-containerregistry/internal/compression
@@ -627,8 +627,8 @@ github.com/sigstore/cosign/v2/pkg/oci/remote
 github.com/sigstore/cosign/v2/pkg/oci/signed
 github.com/sigstore/cosign/v2/pkg/oci/static
 github.com/sigstore/cosign/v2/pkg/types
-# github.com/sigstore/fulcio v1.6.6
-## explicit; go 1.23.3
+# github.com/sigstore/fulcio v1.7.2-0.20250428070500-b68b5cf4bb22
+## explicit; go 1.24.0
 github.com/sigstore/fulcio/pkg/api
 github.com/sigstore/fulcio/pkg/certificate
 # github.com/sigstore/protobuf-specs v0.4.2-0.20250428063714-5296f13d62e7

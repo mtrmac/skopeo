@@ -1,7 +1,7 @@
 module github.com/containers/skopeo
 
 // Minimum required golang version
-go 1.23.4
+go 1.24.0
 
 toolchain go1.24.1
 
@@ -14,12 +14,13 @@ require (
 	github.com/containers/ocicrypt v1.2.1
 	github.com/containers/storage v1.58.0
 	github.com/docker/distribution v2.8.3+incompatible
-	github.com/google/go-containerregistry v0.20.3
+	github.com/google/go-containerregistry v0.20.4-0.20250225234217-098045d5e61f
 	github.com/moby/sys/capability v0.4.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sigstore/cosign/v2 v2.5.1-0.20250429060211-0ee2584d3140
+	github.com/sigstore/fulcio v1.7.2-0.20250428070500-b68b5cf4bb22
 	github.com/sigstore/sigstore v1.9.5-0.20250425152508-f0b410889b21
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
@@ -59,9 +60,9 @@ require (
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fsnotify/fsnotify v1.8.0 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
-	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/analysis v0.23.0 // indirect
@@ -126,7 +127,6 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/sigstore/fulcio v1.6.6 // indirect
 	github.com/sigstore/protobuf-specs v0.4.2-0.20250428063714-5296f13d62e7 // indirect
 	github.com/sigstore/rekor v1.3.10 // indirect
 	github.com/sigstore/sigstore-go v0.7.3-0.20250424235137-7cdd5e0e1e5c // indirect
