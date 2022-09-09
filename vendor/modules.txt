@@ -101,7 +101,7 @@ github.com/containers/image/v5/types
 github.com/containers/image/v5/version
 # github.com/containers/libtrust v0.0.0-20190913040956-14b96171aa3b
 github.com/containers/libtrust
-# github.com/containers/ocicrypt v1.1.2
+# github.com/containers/ocicrypt v1.1.5
 github.com/containers/ocicrypt
 github.com/containers/ocicrypt/blockcipher
 github.com/containers/ocicrypt/config
@@ -258,7 +258,7 @@ github.com/mattn/go-runewidth
 github.com/mattn/go-shellwords
 # github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/miekg/pkcs11 v1.0.3
+# github.com/miekg/pkcs11 v1.1.1
 github.com/miekg/pkcs11
 # github.com/mistifyio/go-zfs v2.1.2-0.20190413222219-f784269be439+incompatible
 github.com/mistifyio/go-zfs
@@ -272,7 +272,7 @@ github.com/modern-go/reflect2
 github.com/mtrmac/gpgme
 # github.com/opencontainers/go-digest v1.0.0
 github.com/opencontainers/go-digest
-# github.com/opencontainers/image-spec v1.0.2-0.20210819154149-5ad6f50d6283
+# github.com/opencontainers/image-spec v1.0.2
 github.com/opencontainers/image-spec/schema
 github.com/opencontainers/image-spec/specs-go
 github.com/opencontainers/image-spec/specs-go/v1
@@ -356,6 +356,8 @@ go.opencensus.io/internal
 go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/tracestate
+# go4.org v0.0.0-20201209231011-d4a079459e60
+go4.org/errorutil
 # golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 golang.org/x/crypto/cast5
 golang.org/x/crypto/ed25519
@@ -480,5 +482,5 @@ gopkg.in/square/go-jose.v2/cipher
 gopkg.in/square/go-jose.v2/json
 # gopkg.in/yaml.v2 v2.4.0
 gopkg.in/yaml.v2
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+# gopkg.in/yaml.v3 v3.0.0
 gopkg.in/yaml.v3
