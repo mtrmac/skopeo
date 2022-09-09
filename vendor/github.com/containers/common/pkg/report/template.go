@@ -25,27 +25,29 @@ var tableReplacer = strings.NewReplacer(
 	"table ", "",
 	`\t`, "\t",
 	" ", "\t",
+	`\n`, "\n",
 )
 
 // escapedReplacer will clean up escaped characters from CLI
 var escapedReplacer = strings.NewReplacer(
 	`\t`, "\t",
+	`\n`, "\n",
 )
 
 var DefaultFuncs = FuncMap{
 	"join": strings.Join,
 	"json": func(v interface{}) string {
-		buf := &bytes.Buffer{}
+		buf := new(bytes.Buffer)
 		enc := json.NewEncoder(buf)
 		enc.SetEscapeHTML(false)
-		enc.Encode(v)
+		_ = enc.Encode(v)
 		// Remove the trailing new line added by the encoder
 		return strings.TrimSpace(buf.String())
 	},
 	"lower":    strings.ToLower,
 	"pad":      padWithSpace,
 	"split":    strings.Split,
-	"title":    strings.Title,
+	"title":    strings.Title, //nolint:staticcheck
 	"truncate": truncateWithLength,
 	"upper":    strings.ToUpper,
 }
@@ -157,7 +159,7 @@ func (t *Template) IsTable() bool {
 	return t.isTable
 }
 
-var rangeRegex = regexp.MustCompile(`{{\s*range\s*\.\s*}}.*{{\s*end\s*-?\s*}}`)
+var rangeRegex = regexp.MustCompile(`(?s){{\s*range\s*\.\s*}}.*{{\s*end\s*-?\s*}}`)
 
 // EnforceRange ensures that the format string contains a range
 func EnforceRange(format string) string {

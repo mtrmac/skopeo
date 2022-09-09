@@ -3,7 +3,9 @@ package auth
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,7 +15,6 @@ import (
 	"github.com/containers/image/v5/pkg/docker/config"
 	"github.com/containers/image/v5/pkg/sysregistriesv2"
 	"github.com/containers/image/v5/types"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	terminal "golang.org/x/term"
 )
@@ -25,8 +26,8 @@ func GetDefaultAuthFile() string {
 	if authfile := os.Getenv("REGISTRY_AUTH_FILE"); authfile != "" {
 		return authfile
 	}
-	if auth_env := os.Getenv("DOCKER_CONFIG"); auth_env != "" {
-		return filepath.Join(auth_env, "config.json")
+	if authEnv := os.Getenv("DOCKER_CONFIG"); authEnv != "" {
+		return filepath.Join(authEnv, "config.json")
 	}
 	return ""
 }
@@ -38,7 +39,7 @@ func CheckAuthFile(authfile string) error {
 		return nil
 	}
 	if _, err := os.Stat(authfile); err != nil {
-		return errors.Wrap(err, "checking authfile")
+		return fmt.Errorf("checking authfile: %w", err)
 	}
 	return nil
 }
@@ -70,13 +71,10 @@ func Login(ctx context.Context, systemContext *types.SystemContext, opts *LoginO
 	systemContext = systemContextWithOptions(systemContext, opts.AuthFile, opts.CertDir)
 
 	var (
-		authConfig    types.DockerAuthConfig
 		key, registry string
-		ref           reference.Named
 		err           error
 	)
-	l := len(args)
-	switch l {
+	switch len(args) {
 	case 0:
 		if !opts.AcceptUnspecifiedRegistry {
 			return errors.New("please provide a registry to login to")
@@ -88,31 +86,23 @@ func Login(ctx context.Context, systemContext *types.SystemContext, opts *LoginO
 		logrus.Debugf("registry not specified, default to the first registry %q from registries.conf", key)
 
 	case 1:
-		key, registry, ref, err = parseRegistryArgument(args[0], opts.AcceptRepositories)
+		key, registry, err = parseCredentialsKey(args[0], opts.AcceptRepositories)
 		if err != nil {
 			return err
 		}
 
 	default:
 		return errors.New("login accepts only one registry to login to")
-
 	}
 
-	if ref != nil {
-		authConfig, err = config.GetCredentialsForRef(systemContext, ref)
-		if err != nil {
-			return errors.Wrap(err, "get credentials for repository")
-		}
-	} else {
-		authConfig, err = config.GetCredentials(systemContext, registry)
-		if err != nil {
-			return errors.Wrap(err, "get credentials")
-		}
+	authConfig, err := config.GetCredentials(systemContext, key)
+	if err != nil {
+		return fmt.Errorf("get credentials: %w", err)
 	}
 
 	if opts.GetLoginSet {
 		if authConfig.Username == "" {
-			return errors.Errorf("not logged into %s", key)
+			return fmt.Errorf("not logged into %s", key)
 		}
 		fmt.Fprintf(opts.Stdout, "%s\n", authConfig.Username)
 		return nil
@@ -149,7 +139,7 @@ func Login(ctx context.Context, systemContext *types.SystemContext, opts *LoginO
 
 	username, password, err := getUserAndPass(opts, password, authConfig.Username)
 	if err != nil {
-		return errors.Wrap(err, "getting username and password")
+		return fmt.Errorf("getting username and password: %w", err)
 	}
 
 	if err = docker.CheckAuth(ctx, systemContext, username, password, registry); err == nil {
@@ -168,64 +158,64 @@ func Login(ctx context.Context, systemContext *types.SystemContext, opts *LoginO
 	}
 	if unauthorized, ok := err.(docker.ErrUnauthorizedForCredentials); ok {
 		logrus.Debugf("error logging into %q: %v", key, unauthorized)
-		return errors.Errorf("error logging into %q: invalid username/password", key)
+		return fmt.Errorf("error logging into %q: invalid username/password", key)
 	}
-	return errors.Wrapf(err, "authenticating creds for %q", key)
+	return fmt.Errorf("authenticating creds for %q: %w", key, err)
 }
 
-// parseRegistryArgument verifies the provided arg depending if we accept
-// repositories or not.
-func parseRegistryArgument(arg string, acceptRepositories bool) (key, registry string, maybeRef reference.Named, err error) {
+// parseCredentialsKey turns the provided argument into a valid credential key
+// and computes the registry part.
+func parseCredentialsKey(arg string, acceptRepositories bool) (key, registry string, err error) {
+	// URL arguments are replaced with their host[:port] parts.
+	key, err = replaceURLByHostPort(arg)
+	if err != nil {
+		return "", "", err
+	}
+
+	split := strings.Split(key, "/")
+	registry = split[0]
+
 	if !acceptRepositories {
-		registry = getRegistryName(arg)
-		key = registry
-		return key, registry, maybeRef, nil
+		return registry, registry, nil
 	}
 
-	key = trimScheme(arg)
-	if key != arg {
-		return key, registry, nil, errors.New("credentials key has https[s]:// prefix")
-	}
-
-	registry = getRegistryName(key)
+	// Return early if the key isn't namespaced or uses an http{s} prefix.
 	if registry == key {
-		// We cannot parse a reference from a registry, so we stop here
-		return key, registry, nil, nil
+		return key, registry, nil
 	}
 
-	ref, parseErr := reference.ParseNamed(key)
-	if parseErr != nil {
-		return key, registry, nil, errors.Wrapf(parseErr, "parse reference from %q", key)
+	// Sanity-check that the key looks reasonable (e.g. doesn't use invalid characters),
+	// and does not contain a tag or digest.
+	// WARNING: ref.Named() MUST NOT be used to compute key, because
+	// reference.ParseNormalizedNamed() turns docker.io/vendor to docker.io/library/vendor
+	// Ideally c/image should provide dedicated validation functionality.
+	ref, err := reference.ParseNormalizedNamed(key)
+	if err != nil {
+		return "", "", fmt.Errorf("parse reference from %q: %w", key, err)
 	}
-
 	if !reference.IsNameOnly(ref) {
-		return key, registry, nil, errors.Errorf("reference %q contains tag or digest", ref.String())
+		return "", "", fmt.Errorf("reference %q contains tag or digest", ref.String())
+	}
+	refRegistry := reference.Domain(ref)
+	if refRegistry != registry { // This should never happen, check just to make sure
+		return "", "", fmt.Errorf("internal error: key %q registry mismatch, %q vs. %q", key, ref, refRegistry)
 	}
 
-	maybeRef = ref
-	registry = reference.Domain(ref)
-
-	return key, registry, maybeRef, nil
+	return key, registry, nil
 }
 
-// getRegistryName scrubs and parses the input to get the server name
-func getRegistryName(server string) string {
-	// removes 'http://' or 'https://' from the front of the
-	// server/registry string if either is there.  This will be mostly used
-	// for user input from 'Buildah login' and 'Buildah logout'.
-	server = trimScheme(server)
-	// gets the registry from the input. If the input is of the form
-	// quay.io/myuser/myimage, it will parse it and just return quay.io
-	split := strings.Split(server, "/")
-	return split[0]
-}
-
-// trimScheme removes the HTTP(s) scheme from the provided repository.
-func trimScheme(repository string) string {
-	// removes 'http://' or 'https://' from the front of the
-	// server/registry string if either is there.  This will be mostly used
-	// for user input from 'Buildah login' and 'Buildah logout'.
-	return strings.TrimPrefix(strings.TrimPrefix(repository, "https://"), "http://")
+// If the specified string starts with http{s} it is replaced with it's
+// host[:port] parts; everything else is stripped. Otherwise, the string is
+// returned as is.
+func replaceURLByHostPort(repository string) (string, error) {
+	if !strings.HasPrefix(repository, "https://") && !strings.HasPrefix(repository, "http://") {
+		return repository, nil
+	}
+	u, err := url.Parse(repository)
+	if err != nil {
+		return "", fmt.Errorf("trimming http{s} prefix: %v", err)
+	}
+	return u.Host, nil
 }
 
 // getUserAndPass gets the username and password from STDIN if not given
@@ -242,7 +232,7 @@ func getUserAndPass(opts *LoginOptions, password, userFromAuthFile string) (user
 		}
 		username, err = reader.ReadString('\n')
 		if err != nil {
-			return "", "", errors.Wrap(err, "reading username")
+			return "", "", fmt.Errorf("reading username: %w", err)
 		}
 		// If the user just hit enter, use the displayed user from the
 		// the authentication file.  This allows to do a lazy
@@ -254,9 +244,9 @@ func getUserAndPass(opts *LoginOptions, password, userFromAuthFile string) (user
 	}
 	if password == "" {
 		fmt.Fprint(opts.Stdout, "Password: ")
-		pass, err := terminal.ReadPassword(0)
+		pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
-			return "", "", errors.Wrap(err, "reading password")
+			return "", "", fmt.Errorf("reading password: %w", err)
 		}
 		password = string(pass)
 		fmt.Fprintln(opts.Stdout)
@@ -271,15 +261,23 @@ func Logout(systemContext *types.SystemContext, opts *LogoutOptions, args []stri
 	}
 	systemContext = systemContextWithOptions(systemContext, opts.AuthFile, "")
 
+	if opts.All {
+		if len(args) != 0 {
+			return errors.New("--all takes no arguments")
+		}
+		if err := config.RemoveAllAuthentication(systemContext); err != nil {
+			return err
+		}
+		fmt.Fprintln(opts.Stdout, "Removed login credentials for all registries")
+		return nil
+	}
+
 	var (
 		key, registry string
-		ref           reference.Named
 		err           error
 	)
-	if len(args) > 1 {
-		return errors.New("logout accepts only one registry to logout from")
-	}
-	if len(args) == 0 && !opts.All {
+	switch len(args) {
+	case 0:
 		if !opts.AcceptUnspecifiedRegistry {
 			return errors.New("please provide a registry to logout from")
 		}
@@ -288,42 +286,27 @@ func Logout(systemContext *types.SystemContext, opts *LogoutOptions, args []stri
 		}
 		registry = key
 		logrus.Debugf("registry not specified, default to the first registry %q from registries.conf", key)
-	}
-	if len(args) != 0 {
-		if opts.All {
-			return errors.New("--all takes no arguments")
-		}
-		key, registry, ref, err = parseRegistryArgument(args[0], opts.AcceptRepositories)
+
+	case 1:
+		key, registry, err = parseCredentialsKey(args[0], opts.AcceptRepositories)
 		if err != nil {
 			return err
 		}
-	}
 
-	if opts.All {
-		if err := config.RemoveAllAuthentication(systemContext); err != nil {
-			return err
-		}
-		fmt.Fprintln(opts.Stdout, "Removed login credentials for all registries")
-		return nil
+	default:
+		return errors.New("logout accepts only one registry to logout from")
 	}
 
 	err = config.RemoveAuthentication(systemContext, key)
-	switch errors.Cause(err) {
-	case nil:
+	if err == nil {
 		fmt.Fprintf(opts.Stdout, "Removed login credentials for %s\n", key)
 		return nil
-	case config.ErrNotLoggedIn:
-		var authConfig types.DockerAuthConfig
-		if ref != nil {
-			authConfig, err = config.GetCredentialsForRef(systemContext, ref)
-			if err != nil {
-				return errors.Wrap(err, "get credentials for repository")
-			}
-		} else {
-			authConfig, err = config.GetCredentials(systemContext, registry)
-			if err != nil {
-				return errors.Wrap(err, "get credentials")
-			}
+	}
+
+	if errors.Is(err, config.ErrNotLoggedIn) {
+		authConfig, err := config.GetCredentials(systemContext, key)
+		if err != nil {
+			return fmt.Errorf("get credentials: %w", err)
 		}
 
 		authInvalid := docker.CheckAuth(context.Background(), systemContext, authConfig.Username, authConfig.Password, registry)
@@ -331,10 +314,10 @@ func Logout(systemContext *types.SystemContext, opts *LogoutOptions, args []stri
 			fmt.Printf("Not logged into %s with current tool. Existing credentials were established via docker login. Please use docker logout instead.\n", key)
 			return nil
 		}
-		return errors.Errorf("Not logged into %s\n", key)
-	default:
-		return errors.Wrapf(err, "logging out of %q", key)
+		return fmt.Errorf("not logged into %s", key)
 	}
+
+	return fmt.Errorf("logging out of %q: %w", key, err)
 }
 
 // defaultRegistryWhenUnspecified returns first registry from search list of registry.conf
@@ -342,7 +325,7 @@ func Logout(systemContext *types.SystemContext, opts *LogoutOptions, args []stri
 func defaultRegistryWhenUnspecified(systemContext *types.SystemContext) (string, error) {
 	registriesFromFile, err := sysregistriesv2.UnqualifiedSearchRegistries(systemContext)
 	if err != nil {
-		return "", errors.Wrap(err, "getting registry from registry.conf, please specify a registry")
+		return "", fmt.Errorf("getting registry from registry.conf, please specify a registry: %w", err)
 	}
 	if len(registriesFromFile) == 0 {
 		return "", errors.New("no registries found in registries.conf, a registry must be provided")
