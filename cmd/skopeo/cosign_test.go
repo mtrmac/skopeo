@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -21,6 +22,19 @@ import (
 // Requires cosignTempRegistry from cosign_uncommitted_test.go
 
 const cosignPristineTestImage = cosignTempRegistry + "/pristine/alpine:3.10.2"
+
+var dirCount atomic.Int32
+
+func tempDir(t *testing.T) string {
+	if dir := os.Getenv("SKOPEO_TEMP_PRESERVE"); dir != "" {
+		i := dirCount.Add(1)
+		path := filepath.Join(dir, fmt.Sprintf("%d", i))
+		err := os.MkdirAll(path, 0o700)
+		require.NoError(t, err)
+		return path
+	}
+	return t.TempDir()
+}
 
 type keys struct {
 	pub, priv  string
@@ -42,7 +56,7 @@ func runAndLogSkopeo(t *testing.T, args ...string) string {
 
 func generateKeys(t *testing.T) keys {
 	passphrase := "pass"
-	dir := t.TempDir()
+	dir := tempDir(t)
 	cmd := exec.Command("cosign", "generate-key-pair")
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD="+passphrase)
@@ -78,7 +92,7 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
 		"docker://"+cosignPristineTestImage, "docker://"+testImage)
 
-	dir := t.TempDir()
+	dir := tempDir(t)
 
 	sigPath := filepath.Join(dir, "sig")
 	cmd := exec.Command("cosign", "sign", "--tlog-upload=false", "--key", keys.priv, "--output-signature", sigPath, testImage)
@@ -86,10 +100,10 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	run(t, cmd)
 	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
-	imageDir := t.TempDir()
+	imageDir := tempDir(t)
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
 
-	sigImageDir := t.TempDir()
+	sigImageDir := tempDir(t)
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
 	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
@@ -118,7 +132,7 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
 		"docker://"+cosignPristineTestImage, "docker://"+testImage)
 
-	dir := t.TempDir()
+	dir := tempDir(t)
 	sigPath := filepath.Join(dir, "sig")
 	setPath := filepath.Join(dir, "set")
 
@@ -127,10 +141,10 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	run(t, cmd)
 	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
-	imageDir := t.TempDir()
+	imageDir := tempDir(t)
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
 
-	sigImageDir := t.TempDir()
+	sigImageDir := tempDir(t)
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
 	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
@@ -160,7 +174,7 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
 		"docker://"+cosignPristineTestImage, "docker://"+testImage)
 
-	dir := t.TempDir()
+	dir := tempDir(t)
 	sigPath := filepath.Join(dir, "sig")
 	setPath := filepath.Join(dir, "set")
 	certPath := filepath.Join(dir, "cert")
@@ -184,10 +198,10 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 	}()
 	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
-	imageDir := t.TempDir()
+	imageDir := tempDir(t)
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
 
-	sigImageDir := t.TempDir()
+	sigImageDir := tempDir(t)
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
 	sigRef, err := directory.NewReference(sigImageDir)
 	require.NoError(t, err)
@@ -228,7 +242,7 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 func TestCosignStandaloneSign(t *testing.T) {
 	keys := generateKeys(t)
 
-	dir := t.TempDir()
+	dir := tempDir(t)
 	manifestPath := filepath.Join(dir, "manifest")
 	sigPath := filepath.Join(dir, "signature")
 	payloadPath := filepath.Join(dir, "payload")
@@ -257,7 +271,7 @@ func TestCosignStandaloneSign(t *testing.T) {
 }
 
 func TestCosignStandaloneFulcioSign(t *testing.T) {
-	dir := t.TempDir()
+	dir := tempDir(t)
 	manifestPath := filepath.Join(dir, "manifest")
 	sigPath := filepath.Join(dir, "signature")
 	payloadPath := filepath.Join(dir, "payload")
