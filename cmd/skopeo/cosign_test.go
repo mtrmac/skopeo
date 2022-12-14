@@ -283,6 +283,7 @@ func TestCosignStandaloneSign(t *testing.T) {
 	sigPath := filepath.Join(dir, "signature")
 	payloadPath := filepath.Join(dir, "payload")
 	passphrasePath := filepath.Join(dir, "pass")
+	setPath := filepath.Join(dir, "set")
 
 	ref, err := docker.ParseReference("//" + cosignPristineTestImage)
 	require.NoError(t, err)
@@ -295,15 +296,15 @@ func TestCosignStandaloneSign(t *testing.T) {
 
 	err = os.WriteFile(passphrasePath, []byte(keys.passphrase), 0o600)
 	require.NoError(t, err)
-	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage,
+	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage, "--rekor-default",
 		"--key", keys.priv, "--key-passphrase-file", passphrasePath,
-		"--signature", sigPath, "--payload", payloadPath)
+		"--signature", sigPath, "--payload", payloadPath, "--rekor-set", setPath)
 
-	cmd := exec.Command("cosign", "verify-blob", "--key", keys.pub, "--signature", sigPath, payloadPath)
+	cmd := exec.Command("cosign", "verify-blob", "--key", keys.pub, "--signature", sigPath, "--bundle", setPath, payloadPath)
 	run(t, cmd)
 
-	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, manifestPath, "--require-rekor=false",
-		payloadPath, sigPath)
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, manifestPath, "--require-rekor=true",
+		"--rekor-set", setPath, payloadPath, sigPath)
 }
 
 func TestCosignStandaloneFulcioSign(t *testing.T) {
@@ -313,6 +314,7 @@ func TestCosignStandaloneFulcioSign(t *testing.T) {
 	payloadPath := filepath.Join(dir, "payload")
 	certPath := filepath.Join(dir, "cert")
 	chainPath := filepath.Join(dir, "chain")
+	setPath := filepath.Join(dir, "set")
 
 	ref, err := docker.ParseReference("//" + cosignPristineTestImage)
 	require.NoError(t, err)
@@ -324,27 +326,23 @@ func TestCosignStandaloneFulcioSign(t *testing.T) {
 	require.NoError(t, err)
 
 	runAndLogSkopeo(t, "cosign-standalone-sign", manifestPath, cosignPristineTestImage,
-		"--fulcio-default", "--certificate", certPath, "--certificate-chain", chainPath,
-		"--signature", sigPath, "--payload", payloadPath)
+		"--fulcio-default", "--rekor-default",
+		"--certificate", certPath, "--certificate-chain", chainPath,
+		"--signature", sigPath, "--payload", payloadPath, "--rekor-set", setPath)
 
-	if false {
-		// FIXME: "--insecure-skip-tlog-verify" is just not hooked up as of 8d2a1a6e16f0375c05314481206cc591c51c041e
-		cmd := exec.Command("cosign", "verify-blob", "--certificate", certPath, "--certificate-chain", chainPath,
-			"--certificate-oidc-issuer", "https://github.com/login/oauth",
-			"--certificate-email", "mitr@redhat.com",
-			"--verbose",
-			"--insecure-skip-tlog-verify", // FIXME: No Rekor requirement yet
-			"--signature", sigPath, payloadPath)
-		run(t, cmd)
-	}
+	cmd := exec.Command("cosign", "verify-blob", "--certificate", certPath, "--certificate-chain", chainPath,
+		"--certificate-oidc-issuer", "https://github.com/login/oauth",
+		"--certificate-email", "mitr@redhat.com",
+		"--verbose",
+		"--signature", sigPath, "--bundle", setPath, payloadPath)
+	run(t, cmd)
 
 	runAndLogSkopeo(t, "cosign-standalone-verify",
 		"--fulcio", "fixtures/fulcio_v1.crt.pem",
 		"--fulcio-issuer", "https://github.com/login/oauth",
 		"--fulcio-email", "mitr@redhat.com",
-		// FIXME: Also upload to Rekor, and verifys that
-		"--require-rekor=false",
-		"--embedded-cert", certPath, "--cert-chain", chainPath,
+		"--require-rekor=true",
+		"--embedded-cert", certPath, "--cert-chain", chainPath, "--rekor-set", setPath,
 		manifestPath, payloadPath, sigPath)
 }
 

@@ -66,15 +66,22 @@ func rekorUpload(ctx context.Context, rekorURL string, proposedEntry models.Prop
 	return resp.GetPayload(), nil
 }
 
-func (opts *cosignRekorUploadOptions) uploadEntry(ctx context.Context, keyOrCertBytes []byte, signatureBytes []byte, payloadBytes []byte) ([]byte, error) {
+func (opts *cosignRekorUploadOptions) canonicalizeOptions() error {
 	if opts.defaultRekorConfig {
 		if opts.rekorURL != "" {
-			return nil, errors.New("--rekor-url and --rekor-default can not be used simultaneously")
+			return errors.New("--rekor-url and --rekor-default can not be used simultaneously")
 		}
 		opts.rekorURL = defaultRekorURL
 	}
 	if opts.rekorURL == "" {
-		return nil, errors.New("--rekor-url or --rekor-default must be specified")
+		return errors.New("--rekor-url or --rekor-default must be specified")
+	}
+	return nil
+}
+
+func (opts *cosignRekorUploadOptions) uploadEntry(ctx context.Context, keyOrCertBytes []byte, signatureBytes []byte, payloadBytes []byte) ([]byte, error) {
+	if opts.rekorURL == "" {
+		return nil, errors.New("internal error: cosignRekorUploadOptions.canonicalizeOptions was supposed to be called first")
 	}
 
 	payloadHash := sha256.Sum256(payloadBytes) // HashedRecord only accepts SHA-256

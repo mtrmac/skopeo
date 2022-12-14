@@ -17,6 +17,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/sigstore/cosign/v3/pkg/cosign"
 	fulcio "github.com/sigstore/fulcio/pkg/api"
+	"github.com/sigstore/sigstore/pkg/cryptoutils"
 	"github.com/sigstore/sigstore/pkg/oauth"
 	"github.com/sigstore/sigstore/pkg/oauthflow"
 	"github.com/sigstore/sigstore/pkg/signature"
@@ -46,6 +47,8 @@ const (
 )
 
 type cosignStandaloneSignOptions struct {
+	global              *globalOptions
+	rekorUpload         *cosignRekorUploadOptions
 	keyPath             string
 	keyPassphrasePath   string
 	fulcioURL           string
@@ -57,10 +60,15 @@ type cosignStandaloneSignOptions struct {
 	signaturePath        string // Output signature path
 	certificatePath      string // Output certificate path
 	certificateChainPath string // Output certificate chain path
+	rekorSETPath         string
 }
 
-func cosignStandaloneSignCmd() *cobra.Command {
-	opts := cosignStandaloneSignOptions{}
+func cosignStandaloneSignCmd(global *globalOptions) *cobra.Command {
+	rekorUploadFlags, rekorUploadOpts := cosignRekorUploadFlags()
+	opts := cosignStandaloneSignOptions{
+		global:      global,
+		rekorUpload: rekorUploadOpts,
+	}
 	cmd := &cobra.Command{
 		Use:   "cosign-standalone-sign [command options] --key|--fulcio-* ... MANIFEST DOCKER-REFERENCE --payload|-p PAYLOAD --signature|-s SIGNATURE",
 		Short: "Create a signature using local files",
@@ -68,6 +76,7 @@ func cosignStandaloneSignCmd() *cobra.Command {
 	}
 	adjustUsage(cmd)
 	flags := cmd.Flags()
+	flags.AddFlagSet(&rekorUploadFlags)
 	flags.StringVar(&opts.keyPath, "key", "", "sign using private key in `KEY`")
 	flags.StringVar(&opts.keyPassphrasePath, "key-passphrase-file", "", "Read a passphrase for --key from `FILE`")
 	flags.StringVar(&opts.fulcioURL, "fulcio-url", "", "use Fulcio at `FULCIO-URL` to obtain a short-term certificate")
@@ -79,10 +88,14 @@ func cosignStandaloneSignCmd() *cobra.Command {
 	flags.StringVarP(&opts.payloadPath, "payload", "p", "", "write the payload to `PAYLOAD`")
 	flags.StringVar(&opts.certificatePath, "certificate", "", "write the generated (short-term) certificate to `CERTIFICATE`")
 	flags.StringVar(&opts.certificateChainPath, "certificate-chain", "", "write the certificate chain of generated (short-term) certificate to `CERTIFICATE-CHAIN`")
+	flags.StringVar(&opts.rekorSETPath, "rekor-set", "", "Create a Rekor SET and write it to `SET-PATH`")
 	return cmd
 }
 
 func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) error {
+	ctx, cancel := opts.global.commandTimeoutContext()
+	defer cancel()
+
 	if len(args) != 2 || opts.payloadPath == "" || opts.signaturePath == "" {
 		return errors.New("Usage: skopeo standalone-sign manifest docker-reference private-key -p payload -s signature")
 	}
@@ -121,6 +134,11 @@ func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) er
 			return errors.New("--fulcio-url requires --fulcio-oidc-client-id")
 		}
 	}
+	if opts.rekorSETPath != "" {
+		if err := opts.rekorUpload.canonicalizeOptions(); err != nil {
+			return err
+		}
+	}
 	manifestPath := args[0]
 	dockerReferenceString := args[1]
 
@@ -136,7 +154,7 @@ func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) er
 
 	// --- Set up signing credentials
 	var signer signature.Signer
-	var generatedCertificate, generatedCertificateChain []byte
+	var generatedCertificate, generatedCertificateChain, signingKeyOrCert []byte
 	if opts.keyPath != "" {
 		// github.com/sigstore/cosign/pkg/signature.SignerVerifierForKeyRef(ctx, keyRef, pf) includes support for pkcs11:, k8s://, gitlab (not even a colon!),
 		// and any other registered KMSes (at least awskms://, azurekms://, gcpkms://, hashivault://).
@@ -164,9 +182,17 @@ func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) er
 		if err != nil {
 			return fmt.Errorf("Error initializing private key: %w", err)
 		}
+		publicKey, err := signerVerifier.PublicKey()
+		if err != nil {
+			return fmt.Errorf("Error getting public key from private key: %w", err)
+		}
+		publicKeyPEM, err := cryptoutils.MarshalPublicKeyToPEM(publicKey)
+		if err != nil {
+			return fmt.Errorf("Error converting public key to PEM: %w", err)
+		}
 		signer = signerVerifier
+		signingKeyOrCert = publicKeyPEM
 		// FIXME: For generated signatures, should we allow attaching an user-specified certificate (+chain?)
-		// Currently verification or non-Rekor certificates ignores timestamps, which seems very undesirable to enable.
 	} else if opts.fulcioURL != "" {
 		fulcioURL, err := url.Parse(opts.fulcioURL)
 		if err != nil {
@@ -251,7 +277,9 @@ func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) er
 		}
 		generatedCertificate = resp.CertPEM
 		generatedCertificateChain = resp.ChainPEM
-		// FIXME FIXME: "github.com/sigstore/cosign/cmd/cosign/cli/fulcio/fulcioverifier".NewSigner
+		// Cosign goes through an unmarshal/marshal roundtrip for Fulcio-generated certificates, let’s not do that.
+		signingKeyOrCert = resp.CertPEM
+		// FIXME FIXME: "github.com/sigstore/cosign/cmd/cosign/cli/fulcio/fulcioverifier".NewSigner:
 		// This SCT verifies that Fulcio has uploaded the generated certificate to a transparency log of some kind.
 		// Cosign names the option not to verify the SCT as "insecure-skip-verify", documents it as
 		// “this should only be used for testing”, but… why???
@@ -293,6 +321,15 @@ func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) er
 	}
 	base64Signature := base64.StdEncoding.EncodeToString(signatureBytes)
 
+	var rekorSETBytes []byte
+	if opts.rekorSETPath != "" {
+		set, err := opts.rekorUpload.uploadEntry(ctx, signingKeyOrCert, signatureBytes, payloadBytes)
+		if err != nil {
+			return err
+		}
+		rekorSETBytes = set
+	}
+
 	// --- Write the signing outcome
 	if err := os.WriteFile(opts.payloadPath, payloadBytes, 0644); err != nil {
 		return fmt.Errorf("Error writing payload to %s: %w", opts.payloadPath, err)
@@ -314,6 +351,14 @@ func (opts *cosignStandaloneSignOptions) run(args []string, stdout io.Writer) er
 		}
 		if err := os.WriteFile(opts.certificateChainPath, []byte(generatedCertificateChain), 0644); err != nil {
 			return fmt.Errorf("Error writing certificate chain to %s: %w", opts.certificateChainPath, err)
+		}
+	}
+	if opts.rekorSETPath != "" {
+		if rekorSETBytes == nil {
+			return errors.New("Internal error: --rekor-set was accepted but no SET was created")
+		}
+		if err := os.WriteFile(opts.rekorSETPath, rekorSETBytes, 0644); err != nil {
+			return fmt.Errorf("Error writing Rekor SET to %s: %w", opts.rekorSETPath, err)
 		}
 	}
 	return nil
@@ -517,6 +562,9 @@ func (opts *cosignStandaloneRekorUploadOptions) run(args []string, stdout io.Wri
 
 	if len(args) != 3 || opts.setPath == "" {
 		return errors.New("Usage: skopeo cosign-rekor-upload key-or-cert signature payload -o set")
+	}
+	if err := opts.upload.canonicalizeOptions(); err != nil {
+		return err
 	}
 	keyOrCertPath := args[0]
 	signaturePath := args[1]
