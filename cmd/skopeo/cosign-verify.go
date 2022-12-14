@@ -19,8 +19,8 @@ import (
 	"github.com/sigstore/cosign/v3/pkg/cosign/bundle"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 	"github.com/sigstore/sigstore/pkg/signature"
+	"github.com/sigstore/sigstore/pkg/tuf"
 	"github.com/spf13/pflag"
-	commonFlag "go.podman.io/common/pkg/flag"
 )
 
 type unverifiedSignatureData struct {
@@ -142,7 +142,7 @@ type cosignVerificationOptions struct {
 	publicKeyPath                                     string
 	caBundlePath                                      string
 	fulcioCABundlePath, fulcioOIDCIssuer, fulcioEmail string
-	requireRekor                                      commonFlag.OptionalBool
+	rekorKeyPath                                      string
 }
 
 func cosignVerificationFlags() (pflag.FlagSet, *cosignVerificationOptions) {
@@ -153,7 +153,7 @@ func cosignVerificationFlags() (pflag.FlagSet, *cosignVerificationOptions) {
 	fs.StringVar(&opts.fulcioCABundlePath, "fulcio", "", "expect a signature by a Fulcio-issued certificate, trusting `CA-BUNDLE`")
 	fs.StringVar(&opts.fulcioOIDCIssuer, "fulcio-issuer", "", "require a Fulcio-issued certificate to be authenticated by `ISSUER`")
 	fs.StringVar(&opts.fulcioEmail, "fulcio-email", "", "require a Fulcio-issued certificate to be issued for `EMAIL`")
-	commonFlag.OptionalBoolFlag(&fs, &opts.requireRekor, "require-rekor", "require a Rekor SET")
+	fs.StringVar(&opts.rekorKeyPath, "rekor", "", "require a Rekor SET signed by `PUBLIC-KEY`")
 	return fs, &opts
 }
 
@@ -176,6 +176,12 @@ func (opts *cosignVerificationOptions) runVerification(unverifiedManifestDigest 
 	}
 	if opts.fulcioCABundlePath != "" && opts.fulcioEmail == "" {
 		return errors.New("--fulcio-email must be set with --fulcio")
+	}
+	if opts.fulcioCABundlePath != "" && opts.rekorKeyPath == "" {
+		// Fulcio can, technically, be used without Rekor / timestamps, but the short-lived certificates only practically
+		// work with trusted timestamp authority proving the signature was done during certificate validity. So,
+		// for now, require that, so that we don’t need a FAQ “signature verification reports expired certificates”.
+		return fmt.Errorf("--rekor must be set with --fulcio")
 	}
 
 	// --- Load the trust policy
@@ -221,7 +227,19 @@ func (opts *cosignVerificationOptions) runVerification(unverifiedManifestDigest 
 			return fmt.Errorf("Error loading CA certificates from %s", opts.fulcioCABundlePath)
 		}
 	}
-	requireRekor := opts.requireRekor.Value()
+	var rekorPublicKeys *cosign.TrustedTransparencyLogPubKeys
+	if opts.rekorKeyPath != "" {
+		// Cosign internally uses TUF to obtain the Rekor public keys. We don’t want that complexity.
+		rekorKeyPEM, err := os.ReadFile(opts.rekorKeyPath)
+		if err != nil {
+			return fmt.Errorf("Error reading Rekor public keys from %s: %w", opts.rekorKeyPath, err)
+		}
+		pk := cosign.NewTrustedTransparencyLogPubKeys()
+		rekorPublicKeys = &pk
+		if err := rekorPublicKeys.AddTransparencyLogPubKey(rekorKeyPEM, tuf.Active); err != nil {
+			return fmt.Errorf("Error adding Rekor public key from %s: %w", opts.rekorKeyPath, err)
+		}
+	}
 
 	// --- Set up the trust policy
 	var verifier signature.Verifier // = nil
@@ -243,16 +261,6 @@ func (opts *cosignVerificationOptions) runVerification(unverifiedManifestDigest 
 			}
 			fmt.Fprintf(stdout, "Raw payload signature verified\n")
 		}
-	}
-	var rekorPubKeys *cosign.TrustedTransparencyLogPubKeys
-	if requireRekor {
-		// FIXME FIXME: This invokes TUF to get Rekor public keys. We don’t want that complexity.
-		// Load keys from file instead.
-		pk, err := cosign.GetRekorPubs(context.TODO())
-		if err != nil {
-			return fmt.Errorf("Error loading Rekor public keys")
-		}
-		rekorPubKeys = pk
 	}
 
 	// --- The actual verification implementation
@@ -276,7 +284,7 @@ func (opts *cosignVerificationOptions) runVerification(unverifiedManifestDigest 
 		// FIXME FIXME: this is very lax in parsing the payload (naive JSON parser, not even format ID verification)
 		// FIXME FIXME: this verifies the hash, but not the name, in the payload!!
 		ClaimVerifier: cosign.SimpleClaimVerifier,
-		RekorPubKeys:  rekorPubKeys,
+		RekorPubKeys:  rekorPublicKeys,
 		// Unlike cosign, we don’t enforce existence of SCTs that prove upload of generated certificates to a transparency log.
 		// If requireRekor, that functionality (and more, actually recording the signature, not just the key) is already
 		// provided by Rekor itself, so this is clearly redundant.
@@ -290,14 +298,14 @@ func (opts *cosignVerificationOptions) runVerification(unverifiedManifestDigest 
 		},
 		// FIXME: Do we want to support, at all, the on-line Rekor query?
 		Offline:    true,
-		IgnoreTlog: !requireRekor,
+		IgnoreTlog: rekorPublicKeys == nil,
 	}
 	bundleVerified, err := cosign.VerifyImageSignature(context.TODO(), unverifiedSignature, unverifiedManifestHash, checkOpts)
 	if err != nil {
 		return fmt.Errorf("Error verifying signature mid-level: %w", err)
 	}
 	fmt.Fprintf(stdout, "Mid-level signature verified\n")
-	if requireRekor && !bundleVerified {
+	if rekorPublicKeys != nil && !bundleVerified {
 		return fmt.Errorf("Internal error: Rekor SET verification was requested but did not succeed")
 	}
 

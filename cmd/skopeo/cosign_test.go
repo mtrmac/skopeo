@@ -42,15 +42,17 @@ type keys struct {
 }
 
 func run(t *testing.T, cmd *exec.Cmd) {
+	commandText := fmt.Sprintf("%s %s", cmd.Path, strings.Join(cmd.Args, " "))
 	out, err := cmd.CombinedOutput()
-	require.NoError(t, err, string(out))
-	t.Logf("%s %s: %s", cmd.Path, strings.Join(cmd.Args, " "), out)
+	require.NoError(t, err, string(out), commandText)
+	t.Logf("%s: %s", commandText, out)
 }
 
 func runAndLogSkopeo(t *testing.T, args ...string) string {
+	commandText := fmt.Sprintf("skopeo %s", strings.Join(args, " "))
 	out, err := runSkopeo(args...)
-	require.NoError(t, err)
-	t.Logf("skopeo %s: %s", strings.Join(args, " "), out)
+	require.NoError(t, err, commandText)
+	t.Logf("%s: %s", commandText, out)
 	return out
 }
 
@@ -114,9 +116,9 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	layers := image.LayerInfos()
 	require.NotEmpty(t, layers)
 
-	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--require-rekor=false",
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub,
 		filepath.Join(imageDir, "manifest.json"), filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
-	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--require-rekor=false",
+	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub,
 		filepath.Join(imageDir, "manifest.json"), sigImageRegistryRef)
 }
 
@@ -159,10 +161,10 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	err = os.WriteFile(setPath, []byte(setBlob), 0600)
 	require.NoError(t, err)
 
-	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--require-rekor=true",
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
 		"--rekor-set", setPath, filepath.Join(imageDir, "manifest.json"),
 		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
-	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--require-rekor=true",
+	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
 		filepath.Join(imageDir, "manifest.json"), sigImageRegistryRef)
 }
 
@@ -224,7 +226,7 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 		"--fulcio", "fixtures/fulcio_v1.crt.pem",
 		"--fulcio-issuer", "https://github.com/login/oauth",
 		"--fulcio-email", "mitr@redhat.com",
-		"--require-rekor=true",
+		"--rekor", "fixtures/rekor.pub",
 		"--embedded-cert", certPath, "--cert-chain", chainPath, "--rekor-set", setPath,
 		filepath.Join(imageDir, "manifest.json"),
 		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
@@ -232,7 +234,7 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 		"--fulcio", "fixtures/fulcio_v1.crt.pem",
 		"--fulcio-issuer", "https://github.com/login/oauth",
 		"--fulcio-email", "mitr@redhat.com",
-		"--require-rekor=true",
+		"--rekor", "fixtures/rekor.pub",
 		filepath.Join(imageDir, "manifest.json"),
 		sigImageRegistryRef)
 }
@@ -271,8 +273,8 @@ func TestCosignRekorUpload(t *testing.T) {
 	cmd := exec.Command("cosign", "verify-blob", "--key", keys.pub, "--signature", sigPath, "--bundle", setPath, payloadPath)
 	run(t, cmd)
 
-	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, manifestPath, "--require-rekor=true",
-		"--rekor-set", setPath, payloadPath, sigPath)
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
+		"--rekor-set", setPath, manifestPath, payloadPath, sigPath)
 }
 
 func TestCosignStandaloneSign(t *testing.T) {
@@ -303,8 +305,8 @@ func TestCosignStandaloneSign(t *testing.T) {
 	cmd := exec.Command("cosign", "verify-blob", "--key", keys.pub, "--signature", sigPath, "--bundle", setPath, payloadPath)
 	run(t, cmd)
 
-	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, manifestPath, "--require-rekor=true",
-		"--rekor-set", setPath, payloadPath, sigPath)
+	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
+		"--rekor-set", setPath, manifestPath, payloadPath, sigPath)
 }
 
 func TestCosignStandaloneFulcioSign(t *testing.T) {
@@ -341,7 +343,7 @@ func TestCosignStandaloneFulcioSign(t *testing.T) {
 		"--fulcio", "fixtures/fulcio_v1.crt.pem",
 		"--fulcio-issuer", "https://github.com/login/oauth",
 		"--fulcio-email", "mitr@redhat.com",
-		"--require-rekor=true",
+		"--rekor", "fixtures/rekor.pub",
 		"--embedded-cert", certPath, "--cert-chain", chainPath, "--rekor-set", setPath,
 		manifestPath, payloadPath, sigPath)
 }
