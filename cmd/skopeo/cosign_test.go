@@ -97,7 +97,7 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	dir := tempDir(t)
 
 	sigPath := filepath.Join(dir, "sig")
-	cmd := exec.Command("cosign", "sign", "--tlog-upload=false", "--key", keys.priv, "--output-signature", sigPath, testImage)
+	cmd := exec.Command("cosign", "sign", "--recursive", "--tlog-upload=false", "--key", keys.priv, "--output-signature", sigPath, testImage)
 	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD="+keys.passphrase)
 	run(t, cmd)
 	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
@@ -117,9 +117,10 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	require.NotEmpty(t, layers)
 
 	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub,
-		filepath.Join(imageDir, "manifest.json"), filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
-	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub,
-		filepath.Join(imageDir, "manifest.json"), sigImageRegistryRef)
+		filepath.Join(imageDir, "manifest.json"), filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath+"-sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f")
+	runAndLogSkopeo(t, "--registries.d", "fixtures/registries.d",
+		"cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub,
+		"docker://"+testImage)
 }
 
 // FIXME: Also c/image policy verification for interoperability, both ways.
@@ -164,8 +165,9 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
 		"--rekor-set", setPath, filepath.Join(imageDir, "manifest.json"),
 		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
-	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
-		filepath.Join(imageDir, "manifest.json"), sigImageRegistryRef)
+	runAndLogSkopeo(t, "--registries.d", "fixtures/registries.d",
+		"cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
+		"docker://"+testImage)
 }
 
 func TestCosignFulcioRekorVerify(t *testing.T) {
@@ -230,13 +232,13 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 		"--embedded-cert", certPath, "--cert-chain", chainPath, "--rekor-set", setPath,
 		filepath.Join(imageDir, "manifest.json"),
 		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
-	runAndLogSkopeo(t, "cosign-image-verify", "--tls-verify=false",
+	runAndLogSkopeo(t, "--registries.d", "fixtures/registries.d",
+		"cosign-image-verify", "--tls-verify=false",
 		"--fulcio", "fixtures/fulcio_v1.crt.pem",
 		"--fulcio-issuer", "https://github.com/login/oauth",
 		"--fulcio-email", "mitr@redhat.com",
 		"--rekor", "fixtures/rekor.pub",
-		filepath.Join(imageDir, "manifest.json"),
-		sigImageRegistryRef)
+		"docker://"+testImage)
 }
 
 // FIXME: Test, or remove, the --ca mode
