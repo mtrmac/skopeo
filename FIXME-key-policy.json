@@ -1,0 +1,12 @@
+{
+    "default": [
+        {
+            "type": "sigstoreSigned",
+            "keyPath": "cosign-preserve/1/cosign.pub",
+            "rekorPublicKeyPath": "cmd/skopeo/fixtures/rekor.pub",
+            "signedIdentity": {
+                "type": "matchRepository"
+            }
+        }
+    ]
+}
