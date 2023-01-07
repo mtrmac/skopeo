@@ -351,3 +351,15 @@ func TestCosignStandaloneFulcioSign(t *testing.T) {
 }
 
 // TO DO: Fulcio sign + Rekor upload, as an image
+
+// bin/skopeo --registries.d cmd/skopeo/fixtures/registries.d --override-os linux --tls-verify=false --insecure-policy
+//	copy --debug --sign-by-sigstore=FIXME-param-key docker://$reg/pristine/alpine:3.10.2 docker://$reg/manual/key-rekor
+// cosign verify --key cosign-preserve/1/cosign.pub $reg/manual/key-rekor
+
+// bin/skopeo --registries.d cmd/skopeo/fixtures/registries.d --override-os linux --tls-verify=false --insecure-policy
+//	copy --debug --sign-by-sigstore=FIXME-fulcio-device docker://$reg/pristine/alpine:3.10.2 docker://$reg/manual/fulcio-device-1
+// cosign verify $reg/manual/fulcio-device-1
+
+// bin/skopeo --registries.d cmd/skopeo/fixtures/registries.d --override-os linux --tls-verify=false --insecure-policy
+//	copy --debug --sign-by-sigstore=FIXME-fulcio-interactive docker://$reg/pristine/alpine:3.10.2 docker://$reg/manual/fulcio-interactive-1
+// cosign verify $reg/manual/fulcio-interactive-1
