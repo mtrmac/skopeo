@@ -1,0 +1,16 @@
+{
+    "default": [
+        {
+            "type": "sigstoreSigned",
+            "fulcio": {
+                "caPath": "cmd/skopeo/fixtures/fulcio_v1.crt.pem",
+                "oidcIssuer": "https://github.com/login/oauth",
+                "subjectEmail": "mitr@redhat.com"
+            },
+            "rekorPublicKeyPath": "cmd/skopeo/fixtures/rekor.pub",
+            "signedIdentity": {
+                "type": "matchRepository"
+            }
+        }
+    ]
+}

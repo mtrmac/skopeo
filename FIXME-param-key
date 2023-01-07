@@ -1,0 +1,3 @@
+privateKeyFile: cosign-preserve/1/cosign.key
+privateKeyPassphraseFile: FIXME-param-key-pass
+rekorURL: https://rekor.sigstore.dev
