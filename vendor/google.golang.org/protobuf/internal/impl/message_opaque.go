@@ -56,6 +56,9 @@ func opaqueInitHook(mi *MessageInfo) bool {
 		usePresence, _ := usePresenceForField(si, fd)
 
 		switch {
+		case fd.IsWeak():
+			// Weak fields are no different for opaque.
+			fi = fieldInfoForWeakMessage(fd, si.weakOffset)
 		case fd.ContainingOneof() != nil && !fd.ContainingOneof().IsSynthetic():
 			// Oneofs are no different for opaque.
 			fi = fieldInfoForOneof(fd, si.oneofsByName[fd.ContainingOneof().Name()], mi.Exporter, si.oneofWrappersByNumber[fd.Number()])
@@ -139,7 +142,7 @@ func (mi *MessageInfo) fieldInfoForMapOpaque(si opaqueStructInfo, fd protoreflec
 	if ft.Kind() != reflect.Map {
 		panic(fmt.Sprintf("invalid type: got %v, want map kind", ft))
 	}
-	fieldOffset := offsetOf(fs)
+	fieldOffset := offsetOf(fs, mi.Exporter)
 	conv := NewConverter(ft, fd)
 	return fieldInfo{
 		fieldDesc: fd,
@@ -193,7 +196,7 @@ func (mi *MessageInfo) fieldInfoForScalarListOpaque(si opaqueStructInfo, fd prot
 		panic(fmt.Sprintf("invalid type: got %v, want slice kind", ft))
 	}
 	conv := NewConverter(reflect.PtrTo(ft), fd)
-	fieldOffset := offsetOf(fs)
+	fieldOffset := offsetOf(fs, mi.Exporter)
 	index, _ := presenceIndex(mi.Desc, fd)
 	return fieldInfo{
 		fieldDesc: fd,
@@ -243,7 +246,7 @@ func (mi *MessageInfo) fieldInfoForMessageListOpaque(si opaqueStructInfo, fd pro
 		panic(fmt.Sprintf("invalid type: got %v, want slice kind", ft))
 	}
 	conv := NewConverter(ft, fd)
-	fieldOffset := offsetOf(fs)
+	fieldOffset := offsetOf(fs, mi.Exporter)
 	index, _ := presenceIndex(mi.Desc, fd)
 	fieldNumber := fd.Number()
 	return fieldInfo{
@@ -336,7 +339,7 @@ func (mi *MessageInfo) fieldInfoForMessageListOpaqueNoPresence(si opaqueStructIn
 		panic(fmt.Sprintf("invalid type: got %v, want slice kind", ft))
 	}
 	conv := NewConverter(ft, fd)
-	fieldOffset := offsetOf(fs)
+	fieldOffset := offsetOf(fs, mi.Exporter)
 	return fieldInfo{
 		fieldDesc: fd,
 		has: func(p pointer) bool {
@@ -408,7 +411,7 @@ func (mi *MessageInfo) fieldInfoForScalarOpaque(si opaqueStructInfo, fd protoref
 		deref = true
 	}
 	conv := NewConverter(ft, fd)
-	fieldOffset := offsetOf(fs)
+	fieldOffset := offsetOf(fs, mi.Exporter)
 	index, _ := presenceIndex(mi.Desc, fd)
 	var getter func(p pointer) protoreflect.Value
 	if !nullable {
@@ -477,7 +480,7 @@ func (mi *MessageInfo) fieldInfoForScalarOpaque(si opaqueStructInfo, fd protoref
 func (mi *MessageInfo) fieldInfoForMessageOpaque(si opaqueStructInfo, fd protoreflect.FieldDescriptor, fs reflect.StructField) fieldInfo {
 	ft := fs.Type
 	conv := NewConverter(ft, fd)
-	fieldOffset := offsetOf(fs)
+	fieldOffset := offsetOf(fs, mi.Exporter)
 	index, _ := presenceIndex(mi.Desc, fd)
 	fieldNumber := fd.Number()
 	elemType := fs.Type.Elem()
@@ -616,6 +619,8 @@ func usePresenceForField(si opaqueStructInfo, fd protoreflect.FieldDescriptor) (
 	usesPresenceArray := fd.HasPresence() && fd.Message() == nil && (fd.ContainingOneof() == nil || fd.ContainingOneof().IsSynthetic())
 	switch {
 	case fd.ContainingOneof() != nil && !fd.ContainingOneof().IsSynthetic():
+		return false, false
+	case fd.IsWeak():
 		return false, false
 	case fd.IsMap():
 		return false, false
