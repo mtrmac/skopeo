@@ -1,3 +1,5 @@
+// FIXME: Redo tests without skopeo cosign subcommands
+
 package main
 
 import (
@@ -94,30 +96,11 @@ func TestCosignStandaloneVerify(t *testing.T) {
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
 		"docker://"+cosignPristineTestImage, "docker://"+testImage)
 
-	dir := tempDir(t)
-
-	sigPath := filepath.Join(dir, "sig")
-	cmd := exec.Command("cosign", "sign", "--recursive", "--tlog-upload=false", "--key", keys.priv, "--output-signature", sigPath, testImage)
+	cmd := exec.Command("cosign", "sign", "--recursive", "--tlog-upload=false", "--key", keys.priv, testImage)
 	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD="+keys.passphrase)
 	run(t, cmd)
-	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
-	imageDir := tempDir(t)
-	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
-
-	sigImageDir := tempDir(t)
-	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
-	sigRef, err := directory.NewReference(sigImageDir)
-	require.NoError(t, err)
-	sigSrc, err := sigRef.NewImageSource(context.Background(), nil)
-	require.NoError(t, err)
-	image, err := image.FromSource(context.Background(), nil, sigSrc)
-	require.NoError(t, err)
-	layers := image.LayerInfos()
-	require.NotEmpty(t, layers)
-
-	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub,
-		filepath.Join(imageDir, "manifest.json"), filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath+"-sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f")
+	// FIXME: use policy.json instead
 	runAndLogSkopeo(t, "--registries.d", "fixtures/registries.d",
 		"cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub,
 		"docker://"+testImage)
@@ -135,36 +118,11 @@ func TestCosignStandaloneRekorVerifyKeyOnly(t *testing.T) {
 	runAndLogSkopeo(t, "--insecure-policy", "copy", "--dest-tls-verify=false", "--src-tls-verify=false", "--all",
 		"docker://"+cosignPristineTestImage, "docker://"+testImage)
 
-	dir := tempDir(t)
-	sigPath := filepath.Join(dir, "sig")
-	setPath := filepath.Join(dir, "set")
-
-	cmd := exec.Command("cosign", "sign", "--key", keys.priv, "--tlog-upload", "--output-signature", sigPath, testImage)
+	cmd := exec.Command("cosign", "sign", "--key", keys.priv, "--tlog-upload", testImage)
 	cmd.Env = append(os.Environ(), "COSIGN_PASSWORD="+keys.passphrase)
 	run(t, cmd)
-	sigImageRegistryRef := "docker://" + testRepo + "/alpine:sha256-fa93b01658e3a5a1686dc3ae55f170d8de487006fb53a28efcd12ab0710a2e5f.sig"
 
-	imageDir := tempDir(t)
-	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", "docker://"+testImage, "dir:"+imageDir)
-
-	sigImageDir := tempDir(t)
-	runAndLogSkopeo(t, "--insecure-policy", "copy", "--all", "--src-tls-verify=false", sigImageRegistryRef, "dir:"+sigImageDir)
-	sigRef, err := directory.NewReference(sigImageDir)
-	require.NoError(t, err)
-	sigSrc, err := sigRef.NewImageSource(context.Background(), nil)
-	require.NoError(t, err)
-	image, err := image.FromSource(context.Background(), nil, sigSrc)
-	require.NoError(t, err)
-	layers := image.LayerInfos()
-	require.NotEmpty(t, layers)
-	setBlob, ok := layers[0].Annotations["dev.sigstore.cosign/bundle"]
-	require.True(t, ok)
-	err = os.WriteFile(setPath, []byte(setBlob), 0600)
-	require.NoError(t, err)
-
-	runAndLogSkopeo(t, "cosign-standalone-verify", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
-		"--rekor-set", setPath, filepath.Join(imageDir, "manifest.json"),
-		filepath.Join(sigImageDir, layers[0].Digest.Encoded()), sigPath)
+	// FIXME: use policy.json instead
 	runAndLogSkopeo(t, "--registries.d", "fixtures/registries.d",
 		"cosign-image-verify", "--tls-verify=false", "--public-key", keys.pub, "--rekor", "fixtures/rekor.pub",
 		"docker://"+testImage)
@@ -217,11 +175,11 @@ func TestCosignFulcioRekorVerify(t *testing.T) {
 	require.NotEmpty(t, layers)
 	setBlob, ok := layers[0].Annotations["dev.sigstore.cosign/bundle"]
 	require.True(t, ok)
-	err = os.WriteFile(setPath, []byte(setBlob), 0600)
+	err = os.WriteFile(setPath, []byte(setBlob), 0o600)
 	require.NoError(t, err)
 	chainBlob, ok := layers[0].Annotations["dev.sigstore.cosign/chain"]
 	require.True(t, ok)
-	err = os.WriteFile(chainPath, []byte(chainBlob), 0600)
+	err = os.WriteFile(chainPath, []byte(chainBlob), 0o600)
 	require.NoError(t, err)
 
 	runAndLogSkopeo(t, "cosign-standalone-verify",

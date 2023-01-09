@@ -6,9 +6,29 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"go.podman.io/image/v5/image"
 	"go.podman.io/image/v5/signature"
 )
+
+type cosignVerificationOptions struct {
+	publicKeyPath                                     string
+	caBundlePath                                      string
+	fulcioCABundlePath, fulcioOIDCIssuer, fulcioEmail string
+	rekorKeyPath                                      string
+}
+
+func cosignVerificationFlags() (pflag.FlagSet, *cosignVerificationOptions) {
+	opts := cosignVerificationOptions{}
+	fs := pflag.FlagSet{}
+	fs.StringVar(&opts.publicKeyPath, "public-key", "", "expect a signature signed by `PUBLIC-KEY`")
+	fs.StringVar(&opts.caBundlePath, "ca", "", "expect a signature signed by a certificate issued by one of certificates in `CA-BUNDLE`")
+	fs.StringVar(&opts.fulcioCABundlePath, "fulcio", "", "expect a signature by a Fulcio-issued certificate, trusting `CA-BUNDLE`")
+	fs.StringVar(&opts.fulcioOIDCIssuer, "fulcio-issuer", "", "require a Fulcio-issued certificate to be authenticated by `ISSUER`")
+	fs.StringVar(&opts.fulcioEmail, "fulcio-email", "", "require a Fulcio-issued certificate to be issued for `EMAIL`")
+	fs.StringVar(&opts.rekorKeyPath, "rekor", "", "require a Rekor SET signed by `PUBLIC-KEY`")
+	return fs, &opts
+}
 
 type cosignImageVerifyOptions struct {
 	global       *globalOptions
@@ -85,7 +105,11 @@ func (opts *cosignImageVerifyOptions) run(args []string, stdout io.Writer) (retE
 	if err != nil {
 		return fmt.Errorf("Error creating policy context: %w", err)
 	}
-	defer context.Destroy()
+	defer func() {
+		if err := context.Destroy(); err != nil {
+			retErr = noteCloseFailure(retErr, "tearing down policy context", err)
+		}
+	}()
 
 	// --- Load the verification subject
 	src, err := parseImageSource(ctx, opts.image, imageName)
