@@ -22,7 +22,6 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-
 	"github.com/hashicorp/go-cleanhttp"
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/sigstore/rekor/pkg/generated/client"
@@ -38,9 +37,6 @@ func GetRekorClient(rekorServerURL string, opts ...Option) (*client.Rekor, error
 
 	retryableClient := retryablehttp.NewClient()
 	defaultTransport := cleanhttp.DefaultTransport()
-	if o.NoDisableKeepalives {
-		defaultTransport.DisableKeepAlives = false
-	}
 	if o.InsecureTLS {
 		/* #nosec G402 */
 		defaultTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
