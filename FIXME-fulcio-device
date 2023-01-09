@@ -1,6 +1,6 @@
 fulcio:
   fulcioURL: https://fulcio.sigstore.dev
-  oidcMode: deviceFlow
+  oidcMode: deviceGrant
   oidcIssuerURL: https://oauth2.sigstore.dev/auth
   oidcClientID: sigstore
 rekorURL: https://rekor.sigstore.dev
