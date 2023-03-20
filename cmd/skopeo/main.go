@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"runtime"
+	"runtime/pprof"
 	"strings"
 	"time"
 
@@ -33,6 +36,9 @@ type globalOptions struct {
 	commandTimeout     time.Duration           // Timeout for the command execution
 	registriesConfPath string                  // Path to the "registries.conf" file
 	tmpDir             string                  // Path to use for big temporary files
+	cpuProfile         string
+	cpuProfileFile     *os.File
+	memProfile         string
 }
 
 // requireSubcommand returns an error if no sub command is provided
@@ -55,12 +61,13 @@ func createApp() (*cobra.Command, *globalOptions) {
 	opts := globalOptions{}
 
 	rootCommand := &cobra.Command{
-		Use:               "skopeo",
-		Long:              "Various operations with container images and container image registries",
-		RunE:              requireSubcommand,
-		PersistentPreRunE: opts.before,
-		SilenceUsage:      true,
-		SilenceErrors:     true,
+		Use:                "skopeo",
+		Long:               "Various operations with container images and container image registries",
+		RunE:               requireSubcommand,
+		PersistentPreRunE:  opts.before,
+		PersistentPostRunE: opts.after,
+		SilenceUsage:       true,
+		SilenceErrors:      true,
 		// Hide the completion command which is provided by cobra
 		CompletionOptions: cobra.CompletionOptions{HiddenDefaultCmd: true},
 		// This is documented to parse "local" (non-PersistentFlags) flags of parent commands before
@@ -87,6 +94,8 @@ func createApp() (*cobra.Command, *globalOptions) {
 	rootCommand.PersistentFlags().StringVar(&opts.overrideVariant, "override-variant", "", "use `VARIANT` instead of the running architecture variant for choosing images")
 	rootCommand.PersistentFlags().DurationVar(&opts.commandTimeout, "command-timeout", 0, "timeout for the command execution")
 	rootCommand.PersistentFlags().StringVar(&opts.registriesConfPath, "registries-conf", "", "path to the registries.conf file")
+	rootCommand.PersistentFlags().StringVar(&opts.cpuProfile, "cpuprofile", "", "")
+	rootCommand.PersistentFlags().StringVar(&opts.memProfile, "memprofile", "", "")
 	if err := rootCommand.PersistentFlags().MarkHidden("registries-conf"); err != nil {
 		logrus.Fatal("unable to mark registries-conf flag as hidden")
 	}
@@ -114,11 +123,42 @@ func createApp() (*cobra.Command, *globalOptions) {
 
 // before is run by the cli package for any command, before running the command-specific handler.
 func (opts *globalOptions) before(cmd *cobra.Command, args []string) error {
+	if opts.cpuProfile != "" {
+		f, err := os.Create(opts.cpuProfile)
+		if err != nil {
+			return fmt.Errorf("could not create CPU profile: %w", err)
+		}
+		opts.cpuProfileFile = f
+		if err := pprof.StartCPUProfile(f); err != nil {
+			return fmt.Errorf("could not start CPU profile: %w", err)
+		}
+	}
 	if opts.debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 	if opts.tlsVerify.Present() {
 		logrus.Warn("'--tls-verify' is deprecated, please set this on the specific subcommand")
+	}
+	return nil
+}
+
+func (opts *globalOptions) after(cmd *cobra.Command, args []string) error {
+	if opts.memProfile != "" {
+		f, err := os.Create(opts.memProfile)
+		if err != nil {
+			return fmt.Errorf("could not create memory profile: %w", err)
+		}
+		defer f.Close() // error handling omitted for example
+		runtime.GC()    // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			return fmt.Errorf("could not write memory profile: %w", err)
+		}
+	}
+	if opts.cpuProfile != "" {
+		pprof.StopCPUProfile()
+	}
+	if opts.cpuProfileFile != nil {
+		opts.cpuProfileFile.Close()
 	}
 	return nil
 }
