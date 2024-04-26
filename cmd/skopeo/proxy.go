@@ -66,6 +66,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"os"
 	"sync"
@@ -79,7 +80,6 @@ import (
 	"github.com/containers/image/v5/types"
 	"github.com/opencontainers/go-digest"
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -701,7 +701,7 @@ func (h *proxyHandler) close() {
 		err := image.src.Close()
 		if err != nil {
 			// This shouldn't be fatal
-			logrus.Warnf("Failed to close image %s: %v", transports.ImageName(image.cachedimg.Reference()), err)
+			slog.Warn("Failed to close image", "image", transports.ImageName(image.cachedimg.Reference()), "err", err)
 		}
 	}
 }

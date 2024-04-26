@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"strings"
 
 	"github.com/containers/common/pkg/report"
@@ -17,7 +18,6 @@ import (
 	"github.com/containers/skopeo/cmd/skopeo/inspect"
 	"github.com/docker/distribution/registry/api/errcode"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -211,7 +211,7 @@ func (opts *inspectOptions) run(args []string, stdout io.Writer) (retErr error) 
 			if fatalFailure {
 				return fmt.Errorf("Error determining repository tags: %w", err)
 			}
-			logrus.Warnf("Registry disallows tag list retrieval; skipping")
+			slog.Warn("Registry disallows tag list retrieval; skipping")
 		}
 	}
 	return opts.writeOutput(stdout, outputData)
