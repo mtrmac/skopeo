@@ -91,7 +91,7 @@ func createApp() (*cobra.Command, *globalOptions) {
 	rootCommand.PersistentFlags().DurationVar(&opts.commandTimeout, "command-timeout", 0, "timeout for the command execution")
 	rootCommand.PersistentFlags().StringVar(&opts.registriesConfPath, "registries-conf", "", "path to the registries.conf file")
 	if err := rootCommand.PersistentFlags().MarkHidden("registries-conf"); err != nil {
-		logrus.Fatal("unable to mark registries-conf flag as hidden")
+		panic("unable to mark registries-conf flag as hidden")
 	}
 	rootCommand.PersistentFlags().StringVar(&opts.tmpDir, "tmpdir", "", "directory used to store temporary files")
 	flag := commonFlag.OptionalBoolFlag(rootCommand.Flags(), &opts.tlsVerify, "tls-verify", "Require HTTPS and verify certificates when accessing the registry")
@@ -122,7 +122,7 @@ func (opts *globalOptions) before(cmd *cobra.Command, args []string) error {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 	if opts.tlsVerify.Present() {
-		logrus.Warn("'--tls-verify' is deprecated, please set this on the specific subcommand")
+		slog.Warn("'--tls-verify' is deprecated, please set this on the specific subcommand")
 	}
 	return nil
 }

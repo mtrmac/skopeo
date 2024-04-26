@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -21,7 +22,6 @@ import (
 	dockerdistributionerrcode "github.com/docker/distribution/registry/api/errcode"
 	dockerdistributionapi "github.com/docker/distribution/registry/api/v2"
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"golang.org/x/term"
@@ -85,7 +85,7 @@ type deprecatedTLSVerifyOption struct {
 // ends up being used.
 func (opts *deprecatedTLSVerifyOption) warnIfUsed(alternatives []string) {
 	if opts.tlsVerify.Present() {
-		logrus.Warnf("'--tls-verify' is deprecated, instead use: %s", strings.Join(alternatives, ", "))
+		slog.Warn(fmt.Sprintf("'--tls-verify' is deprecated, instead use: %s", strings.Join(alternatives, ", ")))
 	}
 }
 
@@ -310,10 +310,10 @@ func (opts *imageDestOptions) newSystemContext() (*types.SystemContext, error) {
 func (opts *imageDestOptions) warnAboutIneffectiveOptions(destTransport types.ImageTransport) {
 	if destTransport.Name() != directory.Transport.Name() {
 		if opts.dirForceCompression {
-			logrus.Warnf("--%s can only be used if the destination transport is 'dir'", opts.imageDestFlagPrefix+"compress")
+			slog.Warn(fmt.Sprintf("--%s can only be used if the destination transport is 'dir'", opts.imageDestFlagPrefix+"compress"))
 		}
 		if opts.dirForceDecompression {
-			logrus.Warnf("--%s can only be used if the destination transport is 'dir'", opts.imageDestFlagPrefix+"decompress")
+			slog.Warn(fmt.Sprintf("--%s can only be used if the destination transport is 'dir'", opts.imageDestFlagPrefix+"decompress"))
 		}
 	}
 }

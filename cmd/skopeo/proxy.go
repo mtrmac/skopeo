@@ -66,6 +66,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"os"
 	"sync"
@@ -79,7 +80,6 @@ import (
 	"github.com/containers/image/v5/types"
 	"github.com/opencontainers/go-digest"
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -687,7 +687,7 @@ func (h *proxyHandler) FinishPipe(args []any) (replyBuf, error) {
 
 	// Wait for the goroutine to complete
 	f.wg.Wait()
-	logrus.Debug("Completed pipe goroutine")
+	slog.Debug("Completed pipe goroutine")
 	// And only now do we close the write half; this forces the client to call this API
 	f.w.Close()
 	// Propagate any errors from the goroutine worker
@@ -702,14 +702,14 @@ func (h *proxyHandler) close() {
 		err := image.src.Close()
 		if err != nil {
 			// This shouldn't be fatal
-			logrus.Warnf("Failed to close image %s: %v", transports.ImageName(image.cachedimg.Reference()), err)
+			slog.Warn("Failed to close image", "image", transports.ImageName(image.cachedimg.Reference()), "err", err)
 		}
 	}
 }
 
 // send writes a reply buffer to the socket
 func (buf replyBuf) send(conn *net.UnixConn, err error) error {
-	logrus.Debugf("Sending reply: err=%v value=%v pipeid=%v", err, buf.value, buf.pipeid)
+	slog.Debug("Sending reply", "err", err, "value", buf.value, "pipeid", buf.pipeid)
 	replyToSerialize := reply{
 		Success: err == nil,
 		Value:   buf.value,
@@ -784,7 +784,7 @@ func (h *proxyHandler) processRequest(readBytes []byte) (rb replyBuf, terminate 
 		err = fmt.Errorf("invalid request: %v", err)
 		return
 	}
-	logrus.Debugf("Executing method %s", req.Method)
+	slog.Debug("Executing", "method", req.Method)
 
 	// Dispatch on the method
 	switch req.Method {
@@ -849,7 +849,7 @@ func (opts *proxyOptions) run(args []string, stdout io.Writer) error {
 
 		rb, terminate, err := handler.processRequest(readbuf)
 		if terminate {
-			logrus.Debug("terminating")
+			slog.Debug("terminating")
 			return nil
 		}
 
