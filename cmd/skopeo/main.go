@@ -99,7 +99,7 @@ func createApp() (*cobra.Command, *globalOptions) {
 	rootCommand.PersistentFlags().DurationVar(&opts.commandTimeout, "command-timeout", 0, "timeout for the command execution (e.g. 30s, 10m)")
 	rootCommand.PersistentFlags().StringVar(&opts.registriesConfPath, "registries-conf", "", "path to the registries.conf file")
 	if err := rootCommand.PersistentFlags().MarkHidden("registries-conf"); err != nil {
-		logrus.Fatal("unable to mark registries-conf flag as hidden")
+		panic("unable to mark registries-conf flag as hidden")
 	}
 	rootCommand.PersistentFlags().StringVar(&opts.tmpDir, "tmpdir", "", "directory used to store temporary files")
 	rootCommand.PersistentFlags().StringVar(&opts.userAgentPrefix, "user-agent-prefix", "", "prefix to add to the user agent string")
@@ -128,7 +128,7 @@ func createApp() (*cobra.Command, *globalOptions) {
 func gitCommit() string {
 	bi, ok := debug.ReadBuildInfo()
 	if !ok {
-		logrus.Fatal("runtime.ReadBuildInfo failed")
+		panic("runtime.ReadBuildInfo failed")
 	}
 	for _, e := range bi.Settings {
 		if e.Key == "vcs.revision" {
@@ -145,7 +145,7 @@ func (opts *globalOptions) before(cmd *cobra.Command, args []string) error {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 	if opts.tlsVerify.Present() {
-		logrus.Warn("'--tls-verify' is deprecated, please set this on the specific subcommand")
+		slog.Warn("'--tls-verify' is deprecated, please set this on the specific subcommand")
 	}
 	if opts.insecurePolicy && opts.requireSigned {
 		return fmt.Errorf("--insecure-policy and --require-signed are mutually exclusive")
