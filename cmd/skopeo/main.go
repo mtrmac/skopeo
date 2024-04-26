@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"log/slog"
+	"os"
 	"strings"
 	"time"
 
@@ -116,6 +119,7 @@ func createApp() (*cobra.Command, *globalOptions) {
 func (opts *globalOptions) before(cmd *cobra.Command, args []string) error {
 	if opts.debug {
 		logrus.SetLevel(logrus.DebugLevel)
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 	if opts.tlsVerify.Present() {
 		logrus.Warn("'--tls-verify' is deprecated, please set this on the specific subcommand")
@@ -127,13 +131,20 @@ func main() {
 	if reexec.Init() {
 		return
 	}
+
+	logrus.StandardLogger().SetFormatter(&logrus.TextFormatter{
+		DisableTimestamp: true, // Let log/slog worry about timestamps
+	})
+	logrus.SetOutput(newLogrusWriter(slog.Default()))
+	log.SetFlags(0) // We don’t want date/time in interactive output -- FIXME: noninteractive?
+
 	rootCmd, _ := createApp()
 	if err := rootCmd.Execute(); err != nil {
+		slog.Error(err.Error())
 		if isNotFoundImageError(err) {
-			logrus.StandardLogger().Log(logrus.FatalLevel, err)
-			logrus.Exit(2)
+			os.Exit(2)
 		}
-		logrus.Fatal(err)
+		os.Exit(1)
 	}
 }
 
