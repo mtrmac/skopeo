@@ -3,11 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"log/slog"
+	"os"
 	"runtime/debug"
 	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	lslog "github.com/sirupsen/logrus/hooks/slog"
 	"github.com/spf13/cobra"
 	commonFlag "go.podman.io/common/pkg/flag"
 	"go.podman.io/image/v5/pkg/cli/basetls/tlsdetails"
@@ -15,6 +20,7 @@ import (
 	"go.podman.io/image/v5/types"
 	"go.podman.io/skopeo/version"
 	"go.podman.io/storage/pkg/reexec"
+	"golang.org/x/term"
 )
 
 var defaultUserAgent = "skopeo/" + version.Version
@@ -136,6 +142,7 @@ func gitCommit() string {
 func (opts *globalOptions) before(cmd *cobra.Command, args []string) error {
 	if opts.debug {
 		logrus.SetLevel(logrus.DebugLevel)
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 	if opts.tlsVerify.Present() {
 		logrus.Warn("'--tls-verify' is deprecated, please set this on the specific subcommand")
@@ -150,13 +157,20 @@ func main() {
 	if reexec.Init() {
 		return
 	}
+
+	logrus.SetOutput(io.Discard)
+	logrus.AddHook(lslog.NewHook(slog.Default(), nil))
+	if term.IsTerminal(int(os.Stderr.Fd())) {
+		log.SetFlags(0) // We don’t want date/time in interactive output
+	}
+
 	rootCmd, _ := createApp()
 	if err := rootCmd.Execute(); err != nil {
+		slog.Error(err.Error())
 		if isNotFoundImageError(err) {
-			logrus.StandardLogger().Log(logrus.FatalLevel, err)
-			logrus.Exit(2)
+			os.Exit(2)
 		}
-		logrus.Fatal(err)
+		os.Exit(1)
 	}
 }
 
