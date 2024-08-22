@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -253,10 +254,10 @@ func (cluster *openshiftCluster) relaxImageSignerPermissions(t *testing.T) {
 
 // tearDown stops the cluster services and deletes (only some!) of the state.
 func (cluster *openshiftCluster) tearDown(t *testing.T) {
-	for i := len(cluster.processes) - 1; i >= 0; i-- {
+	for _, process := range slices.Backward(cluster.processes) {
 		// It’s undocumented what Kill() returns if the process has terminated,
 		// so we couldn’t check just for that. This is running in a container anyway…
-		_ = cluster.processes[i].Process.Kill()
+		_ = process.Process.Kill()
 	}
 	if cluster.dockerDir != "" {
 		err := os.RemoveAll(cluster.dockerDir)
