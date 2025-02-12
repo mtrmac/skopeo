@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -14,10 +15,6 @@ import (
 	"go.podman.io/image/v5/types"
 	"go.podman.io/storage/pkg/reexec"
 )
-
-// gitCommit will be the hash that the binary was built from
-// and will be populated by the Makefile
-var gitCommit = ""
 
 var defaultUserAgent = "skopeo/" + version.Version
 
@@ -70,8 +67,10 @@ func createApp() (*cobra.Command, *globalOptions) {
 		// (skopeo --tls-verify inspect) (causes a warning) and (skopeo inspect --tls-verify) (no warning).
 		TraverseChildren: true,
 	}
-	if gitCommit != "" {
-		rootCommand.Version = fmt.Sprintf("%s commit: %s", version.Version, gitCommit)
+	// We don’t use debug.ReadBuildInfo to automate version.Version, because that would not work well for builds from
+	// a released tarball (e.g. RPM builds).
+	if commit := gitCommit(); commit != "" {
+		rootCommand.Version = fmt.Sprintf("%s commit: %s", version.Version, commit)
 	} else {
 		rootCommand.Version = version.Version
 	}
@@ -110,6 +109,20 @@ func createApp() (*cobra.Command, *globalOptions) {
 		untrustedSignatureDumpCmd(),
 	)
 	return rootCommand, &opts
+}
+
+// gitCommit returns the git commit for this codebase, if we are built from a git repo; "" otherwise.
+func gitCommit() string {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		logrus.Fatal("runtime.ReadBuildInfo failed")
+	}
+	for _, e := range bi.Settings {
+		if e.Key == "vcs.revision" {
+			return e.Value
+		}
+	}
+	return ""
 }
 
 // before is run by the cli package for any command, before running the command-specific handler.
