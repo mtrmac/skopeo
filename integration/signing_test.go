@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -29,9 +30,8 @@ type signingSuite struct {
 var _ = suite.SetupAllSuite(&signingSuite{})
 
 func findFingerprint(lineBytes []byte) (string, error) {
-	lines := string(lineBytes)
-	for _, line := range strings.Split(lines, "\n") {
-		fields := strings.Split(line, ":")
+	for line := range bytes.SplitSeq(lineBytes, []byte{'\n'}) {
+		fields := strings.Split(string(line), ":")
 		if len(fields) >= 10 && fields[0] == "fpr" {
 			return fields[9], nil
 		}
