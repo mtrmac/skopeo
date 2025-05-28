@@ -83,6 +83,16 @@ func assertSkopeoFails(t *testing.T, regexp string, args ...string) {
 	assert.Regexp(t, "(?s)"+regexp, string(out)) // (?s) : '.' will also match newlines
 }
 
+// assertSkopeoFailsWithStatus runs a skopeo command as if exec.Command().CombinedOutput,
+// and verifies that it fails with a specific exit status.
+func assertSkopeoFailsWithStatus(t *testing.T, status int, args ...string) {
+	t.Logf("Running %s %s", skopeoBinary, strings.Join(args, " "))
+	_, err := exec.Command(skopeoBinary, args...).CombinedOutput()
+	var exitErr *exec.ExitError
+	require.ErrorAs(t, err, &exitErr)
+	assert.Equal(t, status, exitErr.ExitCode())
+}
+
 // runCommandWithInput runs a command as if exec.Command(), sending it the input to stdin,
 // and verifies that the exit status is 0, or terminates t on failure.
 func runCommandWithInput(t *testing.T, input string, name string, args ...string) {
