@@ -55,7 +55,7 @@ func consumeAndLogOutputs(t *testing.T, id string, cmd *exec.Cmd) {
 }
 
 // combinedOutputOfCommand runs a command as if exec.Command().CombinedOutput(), verifies that the exit status is 0, and returns the output,
-// or terminates c on failure.
+// or terminates t on failure.
 func combinedOutputOfCommand(t *testing.T, name string, args ...string) string {
 	t.Logf("Running %s %s", name, strings.Join(args, " "))
 	out, err := exec.Command(name, args...).CombinedOutput()
@@ -64,8 +64,7 @@ func combinedOutputOfCommand(t *testing.T, name string, args ...string) string {
 }
 
 // assertSkopeoSucceeds runs a skopeo command as if exec.Command().CombinedOutput, verifies that the exit status is 0,
-// and optionally that the output matches a multi-line regexp if it is nonempty;
-// or terminates c on failure
+// and optionally that the output matches a multi-line regexp if it is nonempty
 func assertSkopeoSucceeds(t *testing.T, regexp string, args ...string) {
 	t.Logf("Running %s %s", skopeoBinary, strings.Join(args, " "))
 	out, err := exec.Command(skopeoBinary, args...).CombinedOutput()
@@ -75,9 +74,8 @@ func assertSkopeoSucceeds(t *testing.T, regexp string, args ...string) {
 	}
 }
 
-// assertSkopeoFails runs a skopeo command as if exec.Command().CombinedOutput, verifies that the exit status is 0,
-// and that the output matches a multi-line regexp;
-// or terminates c on failure
+// assertSkopeoFails runs a skopeo command as if exec.Command().CombinedOutput, verifies that the exit status is not 0,
+// and that the output matches a multi-line regexp
 func assertSkopeoFails(t *testing.T, regexp string, args ...string) {
 	t.Logf("Running %s %s", skopeoBinary, strings.Join(args, " "))
 	out, err := exec.Command(skopeoBinary, args...).CombinedOutput()
@@ -86,14 +84,14 @@ func assertSkopeoFails(t *testing.T, regexp string, args ...string) {
 }
 
 // runCommandWithInput runs a command as if exec.Command(), sending it the input to stdin,
-// and verifies that the exit status is 0, or terminates c on failure.
+// and verifies that the exit status is 0, or terminates t on failure.
 func runCommandWithInput(t *testing.T, input string, name string, args ...string) {
 	cmd := exec.Command(name, args...)
 	runExecCmdWithInput(t, cmd, input)
 }
 
 // runExecCmdWithInput runs an exec.Cmd, sending it the input to stdin,
-// and verifies that the exit status is 0, or terminates c on failure.
+// and verifies that the exit status is 0, or terminates t on failure.
 func runExecCmdWithInput(t *testing.T, cmd *exec.Cmd, input string) {
 	t.Logf("Running %s %s", cmd.Path, strings.Join(cmd.Args, " "))
 	consumeAndLogOutputs(t, cmd.Path+" "+strings.Join(cmd.Args, " "), cmd)
