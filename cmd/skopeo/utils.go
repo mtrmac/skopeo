@@ -419,9 +419,10 @@ func promptForPassphrase(privateKeyFile string, stdin, stdout *os.File) (string,
 // authentication error, an I/O error etc.)
 // TODO drive this into containers/image properly
 func isNotFoundImageError(err error) bool {
+	var layoutImageNotFoundError ocilayout.ImageNotFoundError
 	return isDockerManifestUnknownError(err) ||
 		errors.Is(err, storage.ErrNoSuchImage) ||
-		errors.Is(err, ocilayout.ImageNotFoundError{})
+		errors.As(err, &layoutImageNotFoundError)
 }
 
 // isDockerManifestUnknownError is a copy of code from containers/image,
