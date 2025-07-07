@@ -776,9 +776,9 @@ func (s *copySuite) TestCopySignatures() {
 	// Verify that mis-signed images are rejected
 	assertSkopeoSucceeds(t, "", "--tls-verify=false", "copy", "atomic:localhost:5006/myns/personal:personal", "atomic:localhost:5006/myns/official:attack")
 	assertSkopeoSucceeds(t, "", "--tls-verify=false", "copy", "atomic:localhost:5006/myns/official:official", "atomic:localhost:5006/myns/personal:attack")
-	assertSkopeoFails(t, ".*Source image rejected: Invalid GPG signature.*",
+	assertSkopeoFails(t, ".*Source image rejected: (Invalid GPG signature|.* was not found).*",
 		"--tls-verify=false", "--policy", policy, "copy", "atomic:localhost:5006/myns/personal:attack", dirDest)
-	assertSkopeoFails(t, ".*Source image rejected: Invalid GPG signature.*",
+	assertSkopeoFails(t, ".*Source image rejected: (Invalid GPG signature|.* was not found).*",
 		"--tls-verify=false", "--policy", policy, "copy", "atomic:localhost:5006/myns/official:attack", dirDest)
 
 	// Verify that signed identity is verified.
@@ -791,7 +791,7 @@ func (s *copySuite) TestCopySignatures() {
 
 	// Verify that cosigning requirements are enforced
 	assertSkopeoSucceeds(t, "", "--tls-verify=false", "copy", "atomic:localhost:5006/myns/official:official", "atomic:localhost:5006/myns/cosigned:cosigned")
-	assertSkopeoFails(t, ".*Source image rejected: Invalid GPG signature.*",
+	assertSkopeoFails(t, ".*Source image rejected: (Invalid GPG signature|.* was not found).*",
 		"--tls-verify=false", "--policy", policy, "copy", "atomic:localhost:5006/myns/cosigned:cosigned", dirDest)
 
 	assertSkopeoSucceeds(t, "", "--tls-verify=false", "copy", "--sign-by", "personal@example.com", "atomic:localhost:5006/myns/official:official", "atomic:localhost:5006/myns/cosigned:cosigned")
@@ -836,7 +836,7 @@ func (s *copySuite) TestCopyDirSignatures() {
 	// Verify that correct images are accepted
 	assertSkopeoSucceeds(t, "", "--policy", policy, "copy", topDirDest+"/restricted/official", topDirDest+"/dest")
 	// ... and that mis-signed images are rejected.
-	assertSkopeoFails(t, ".*Source image rejected: Invalid GPG signature.*",
+	assertSkopeoFails(t, ".*Source image rejected: (Invalid GPG signature|.* was not found).*",
 		"--policy", policy, "copy", topDirDest+"/restricted/personal", topDirDest+"/dest")
 
 	// Verify that the signed identity is verified.
