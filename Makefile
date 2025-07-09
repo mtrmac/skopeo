@@ -221,7 +221,7 @@ test-system:
 # Intended for CI, assumed to already be running in quay.io/libpod/skopeo_cidev container.
 test-system-local: bin/skopeo
 	hack/warn-destructive-tests.sh
-	hack/test-system.sh
+	hack/test-system.sh SKOPEO_LDFLAGS="$(SKOPEO_LDFLAGS)" BUILDTAGS="$(BUILDTAGS)"
 
 test-unit:
 	# Just call (make test unit-local) here instead of worrying about environment differences
