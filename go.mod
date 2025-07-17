@@ -7,7 +7,7 @@ go 1.23.3
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
-	github.com/containers/common v0.63.1
+	github.com/containers/common v0.64.0
 	github.com/containers/image/v5 v5.36.0
 	github.com/containers/ocicrypt v1.2.1
 	github.com/containers/storage v1.59.0
@@ -26,7 +26,6 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Microsoft/hcsshim v0.13.0 // indirect
