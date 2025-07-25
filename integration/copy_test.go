@@ -745,7 +745,7 @@ func (s *copySuite) TestCopyOCIRoundTrip() {
 // --sign-by and --policy copy, primarily using atomic:
 func (s *copySuite) TestCopySignatures() {
 	t := s.T()
-	mech, _, err := signature.NewEphemeralGPGSigningMechanism([]byte{})
+	mech, err := signature.NewGPGSigningMechanism()
 	require.NoError(t, err)
 	defer mech.Close()
 	if err := mech.SupportsSigning(); err != nil { // FIXME? Test that verification and policy enforcement works, using signatures from fixtures
@@ -801,7 +801,7 @@ func (s *copySuite) TestCopySignatures() {
 // --policy copy for dir: sources
 func (s *copySuite) TestCopyDirSignatures() {
 	t := s.T()
-	mech, _, err := signature.NewEphemeralGPGSigningMechanism([]byte{})
+	mech, err := signature.NewGPGSigningMechanism()
 	require.NoError(t, err)
 	defer mech.Close()
 	if err := mech.SupportsSigning(); err != nil { // FIXME? Test that verification and policy enforcement works, using signatures from fixtures
@@ -902,7 +902,7 @@ func findRegularFiles(t *testing.T, root string) []string {
 // --sign-by and policy use for docker: with lookaside
 func (s *copySuite) TestCopyDockerLookaside() {
 	t := s.T()
-	mech, _, err := signature.NewEphemeralGPGSigningMechanism([]byte{})
+	mech, err := signature.NewGPGSigningMechanism()
 	require.NoError(t, err)
 	defer mech.Close()
 	if err := mech.SupportsSigning(); err != nil { // FIXME? Test that verification and policy enforcement works, using signatures from fixtures
@@ -971,7 +971,7 @@ func (s *copySuite) TestCopyDockerLookaside() {
 // atomic: and docker: X-Registry-Supports-Signatures works and interoperates
 func (s *copySuite) TestCopyAtomicExtension() {
 	t := s.T()
-	mech, _, err := signature.NewEphemeralGPGSigningMechanism([]byte{})
+	mech, err := signature.NewGPGSigningMechanism()
 	require.NoError(t, err)
 	defer mech.Close()
 	if err := mech.SupportsSigning(); err != nil { // FIXME? Test that the reading/writing works using signatures from fixtures
@@ -1031,7 +1031,7 @@ func (s *copySuite) TestCopyVerifyingMirroredSignatures() {
 	t := s.T()
 	const regPrefix = "docker://localhost:5006/myns/mirroring-"
 
-	mech, _, err := signature.NewEphemeralGPGSigningMechanism([]byte{})
+	mech, err := signature.NewGPGSigningMechanism()
 	require.NoError(t, err)
 	defer mech.Close()
 	if err := mech.SupportsSigning(); err != nil { // FIXME? Test that verification and policy enforcement works, using signatures from fixtures
