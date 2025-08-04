@@ -8,7 +8,7 @@ go 1.23.3
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/containers/common v0.64.0
-	github.com/containers/image/v5 v5.36.0
+	github.com/containers/image/v5 v5.36.1
 	github.com/containers/ocicrypt v1.2.1
 	github.com/containers/storage v1.59.1
 	github.com/docker/distribution v2.8.3+incompatible
