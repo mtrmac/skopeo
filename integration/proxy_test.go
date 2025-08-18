@@ -384,7 +384,7 @@ func runTestMetadataAPIs(p *proxy, img string) error {
 	if err != nil {
 		return err
 	}
-	var layerInfoBytesData []interface{}
+	var layerInfoBytesData []any
 	err = json.Unmarshal(layerInfoBytes, &layerInfoBytesData)
 	if err != nil {
 		return err
