@@ -332,7 +332,6 @@ func (h *proxyHandler) allocPipe() (*os.File, *activePipe, error) {
 		w: pipew,
 	}
 	h.activePipes[uint32(pipew.Fd())] = &f
-	f.wg.Add(1)
 	return piper, &f, nil
 }
 
@@ -345,14 +344,12 @@ func (h *proxyHandler) returnBytes(retval any, buf []byte) (replyBuf, error) {
 		return ret, err
 	}
 
-	go func() {
-		// Signal completion when we return
-		defer f.wg.Done()
+	f.wg.Go(func() {
 		_, err = io.Copy(f.w, bytes.NewReader(buf))
 		if err != nil {
 			f.err = err
 		}
-	}()
+	})
 
 	ret.value = retval
 	ret.fd = piper
@@ -583,10 +580,8 @@ func (h *proxyHandler) GetBlob(args []any) (replyBuf, error) {
 		blobr.Close()
 		return ret, err
 	}
-	go func() {
-		// Signal completion when we return
+	f.wg.Go(func() {
 		defer blobr.Close()
-		defer f.wg.Done()
 		verifier := d.Verifier()
 		tr := io.TeeReader(blobr, verifier)
 		n, err := io.Copy(f.w, tr)
@@ -600,7 +595,7 @@ func (h *proxyHandler) GetBlob(args []any) (replyBuf, error) {
 		if !verifier.Verified() {
 			f.err = fmt.Errorf("corrupted blob, expecting %s", d.String())
 		}
-	}()
+	})
 
 	ret.value = blobSize
 	ret.fd = piper
