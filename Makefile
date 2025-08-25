@@ -201,10 +201,11 @@ test-integration:
 		$(MAKE) test-integration-local
 
 
-# Intended for CI, assumed to be running in quay.io/libpod/skopeo_cidev container.
+# Primarily intended for CI.
 test-integration-local: bin/skopeo
 	hack/warn-destructive-tests.sh
-	hack/test-integration.sh $(SKOPEO_LDFLAGS) $(TESTFLAGS)
+	$(MAKE) PREFIX=/usr install
+	cd ./integration && $(GO) test $(SKOPEO_LDFLAGS) $(TESTFLAGS) $(if $(BUILDTAGS),-tags "$(BUILDTAGS)")
 
 # complicated set of options needed to run podman-in-podman
 test-system:
