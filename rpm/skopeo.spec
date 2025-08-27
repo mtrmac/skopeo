@@ -22,7 +22,6 @@
 # Copr builds set a separate epoch for all environments
 %if %{defined fedora}
 %define conditional_epoch 1
-%define fakeroot 1
 %else
 %define conditional_epoch 2
 %endif
@@ -71,17 +70,14 @@ Requires: containers-common >= 4:1-21
 
 %description
 Command line utility to inspect images and repositories directly on Docker
-registries without the need to pull them
+registries without the need to pull them.
 
 # NOTE: The tests subpackage is only intended for testing and will not be supported
 # for end-users and/or customers.
 %package tests
-Summary: Tests for %{name}
+Summary: Test dependencies for %{name}
 
 Requires: %{name} = %{epoch}:%{version}-%{release}
-%if %{defined fakeroot}
-Requires: fakeroot
-%endif
 Requires: gnupg
 Requires: jq
 Requires: golang
@@ -90,13 +86,12 @@ Requires: crun
 Requires: httpd-tools
 Requires: openssl
 Requires: squashfs-tools
-# bats is not present on RHEL and ELN so it shouldn't be a strong dep
+# bats and fakeroot are not present on RHEL and ELN so they shouldn't be strong deps
 Recommends: bats
+Recommends: fakeroot
 
 %description tests
-%{summary}
-
-This package contains system tests for %{name}
+This package installs system test dependencies for %{name}
 
 %prep
 %autosetup -Sgit %{name}-%{version}
@@ -142,10 +137,6 @@ make \
     PREFIX=%{_prefix} \
     install-binary install-docs install-completions
 
-# system tests
-install -d -p %{buildroot}/%{_datadir}/%{name}/test/system
-cp -pav systemtest/* %{buildroot}/%{_datadir}/%{name}/test/system/
-
 #define license tag if not already defined
 %{!?_licensedir:%global license %doc}
 
@@ -166,9 +157,8 @@ cp -pav systemtest/* %{buildroot}/%{_datadir}/%{name}/test/system/
 %dir %{_datadir}/zsh/site-functions
 %{_datadir}/zsh/site-functions/_%{name}
 
+# Only test dependencies installed, no files.
 %files tests
-%license LICENSE vendor/modules.txt
-%{_datadir}/%{name}/test
 
 %changelog
 %autochangelog
