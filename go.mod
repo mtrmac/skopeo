@@ -16,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.7
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	go.podman.io/common v0.0.0-20250826054041-6e4bed3c9118
 	go.podman.io/image/v5 v5.36.1-0.20250820085751-a13b38f45723
 	go.podman.io/storage v1.59.1-0.20250820085751-a13b38f45723
