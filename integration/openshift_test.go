@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/containers/storage/pkg/homedir"
 	"github.com/stretchr/testify/require"
+	"go.podman.io/storage/pkg/homedir"
 )
 
 var adminKUBECONFIG = map[string]string{

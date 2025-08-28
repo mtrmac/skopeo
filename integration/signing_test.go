@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/containers/image/v5/signature"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.podman.io/image/v5/signature"
 )
 
 const (

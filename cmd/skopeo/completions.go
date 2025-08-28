@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/containers/image/v5/directory"
-	"github.com/containers/image/v5/docker"
-	dockerArchive "github.com/containers/image/v5/docker/archive"
-	ociArchive "github.com/containers/image/v5/oci/archive"
-	oci "github.com/containers/image/v5/oci/layout"
-	"github.com/containers/image/v5/sif"
-	"github.com/containers/image/v5/tarball"
-	"github.com/containers/image/v5/transports"
-	"github.com/spf13/cobra"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"go.podman.io/image/v5/directory"
+	"go.podman.io/image/v5/docker"
+	dockerArchive "go.podman.io/image/v5/docker/archive"
+	ociArchive "go.podman.io/image/v5/oci/archive"
+	oci "go.podman.io/image/v5/oci/layout"
+	"go.podman.io/image/v5/sif"
+	"go.podman.io/image/v5/tarball"
+	"go.podman.io/image/v5/transports"
 )
 
 func autocompleteImageNames(cmd *cobra.Command, args []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
