@@ -7,9 +7,9 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/containers/image/v5/pkg/cli"
-	"github.com/containers/image/v5/signature/sigstore"
 	"github.com/spf13/cobra"
+	"go.podman.io/image/v5/pkg/cli"
+	"go.podman.io/image/v5/signature/sigstore"
 )
 
 type generateSigstoreKeyOptions struct {

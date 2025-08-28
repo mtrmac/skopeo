@@ -3,8 +3,8 @@ package inspect
 import (
 	"time"
 
-	"github.com/containers/image/v5/types"
 	digest "github.com/opencontainers/go-digest"
+	"go.podman.io/image/v5/types"
 )
 
 // Output is the output format of (skopeo inspect),

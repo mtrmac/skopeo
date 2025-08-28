@@ -10,13 +10,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/containers/common/pkg/retry"
-	"github.com/containers/image/v5/docker"
-	"github.com/containers/image/v5/docker/archive"
-	"github.com/containers/image/v5/docker/reference"
-	"github.com/containers/image/v5/transports/alltransports"
-	"github.com/containers/image/v5/types"
 	"github.com/spf13/cobra"
+	"go.podman.io/common/pkg/retry"
+	"go.podman.io/image/v5/docker"
+	"go.podman.io/image/v5/docker/archive"
+	"go.podman.io/image/v5/docker/reference"
+	"go.podman.io/image/v5/transports/alltransports"
+	"go.podman.io/image/v5/types"
 )
 
 // tagListOutput is the output format of (skopeo list-tags), primarily so that we can format it with a simple json.MarshalIndent.

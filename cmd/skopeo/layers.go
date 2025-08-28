@@ -7,13 +7,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/containers/common/pkg/retry"
-	"github.com/containers/image/v5/directory"
-	"github.com/containers/image/v5/image"
-	"github.com/containers/image/v5/pkg/blobinfocache"
-	"github.com/containers/image/v5/types"
 	"github.com/opencontainers/go-digest"
 	"github.com/spf13/cobra"
+	"go.podman.io/common/pkg/retry"
+	"go.podman.io/image/v5/directory"
+	"go.podman.io/image/v5/image"
+	"go.podman.io/image/v5/pkg/blobinfocache"
+	"go.podman.io/image/v5/types"
 )
 
 type layersOptions struct {
