@@ -43,7 +43,7 @@ jobs:
 
   # Ignore until golang is updated in distro buildroot to go 1.23.3+
   - job: copr_build
-    trigger: ignore
+    trigger: pull_request
     packages: [skopeo-eln]
     notifications: *copr_build_failure_notification
     targets:
