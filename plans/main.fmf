@@ -24,3 +24,11 @@ prepare:
         fi
         dnf -y upgrade --allowerasing
       order: 20
+    - name: Disable installing everything from srpm
+      how: install
+      exclude:
+        - ".*"
+    - name: Install the main package
+      how: install
+      package:
+        - skopeo-tests
