@@ -17,9 +17,9 @@ require (
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/common v0.0.0-20250826054041-6e4bed3c9118
-	go.podman.io/image/v5 v5.36.1-0.20250820085751-a13b38f45723
-	go.podman.io/storage v1.59.1-0.20250820085751-a13b38f45723
+	go.podman.io/common v0.65.0
+	go.podman.io/image/v5 v5.37.0
+	go.podman.io/storage v1.60.0
 	golang.org/x/term v0.34.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -68,7 +68,6 @@ require (
 	github.com/mistifyio/go-zfs/v3 v3.0.1 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
-	github.com/moby/sys/sequential v0.5.0 // indirect
 	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -108,5 +107,5 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
 	google.golang.org/grpc v1.72.2 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	google.golang.org/protobuf v1.36.8 // indirect
 )
