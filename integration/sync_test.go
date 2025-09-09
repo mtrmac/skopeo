@@ -381,7 +381,7 @@ quay.io:
 	// get the number of tags
 	re := regexp.MustCompile(`^ +- +[^:/ ]+`)
 	var nTags int
-	for _, l := range strings.Split(yamlConfig, "\n") {
+	for l := range strings.SplitSeq(yamlConfig, "\n") {
 		if re.MatchString(l) {
 			nTags++
 		}
