@@ -289,8 +289,11 @@ func imagesToCopyFromRegistry(registryName string, cfg registrySyncConfig, sourc
 	// override ctx with per-registryName options
 	serverCtx.DockerCertPath = cfg.CertDir
 	serverCtx.DockerDaemonCertPath = cfg.CertDir
-	serverCtx.DockerDaemonInsecureSkipTLSVerify = (cfg.TLSVerify.skip == types.OptionalBoolTrue)
-	serverCtx.DockerInsecureSkipTLSVerify = cfg.TLSVerify.skip
+	// Only override TLS verification if explicitly specified in YAML; otherwise, keep CLI/global settings.
+	if cfg.TLSVerify.skip != types.OptionalBoolUndefined {
+		serverCtx.DockerDaemonInsecureSkipTLSVerify = (cfg.TLSVerify.skip == types.OptionalBoolTrue)
+		serverCtx.DockerInsecureSkipTLSVerify = cfg.TLSVerify.skip
+	}
 	if cfg.Credentials != (types.DockerAuthConfig{}) {
 		serverCtx.DockerAuthConfig = &cfg.Credentials
 	}
