@@ -20,7 +20,14 @@ import (
 	"go.podman.io/image/v5/manifest"
 )
 
-const skopeoBinary = "skopeo"
+// FIXME: Move to SetupSuite
+// https://github.com/containers/skopeo/pull/2703#discussion_r2331374730
+var skopeoBinary = func() string {
+	if binary := os.Getenv("SKOPEO_BINARY"); binary != "" {
+		return binary
+	}
+	return "skopeo"
+}()
 
 const testFQIN = "docker://quay.io/libpod/busybox" // tag left off on purpose, some tests need to add a special one
 const testFQIN64 = "docker://quay.io/libpod/busybox:amd64"
