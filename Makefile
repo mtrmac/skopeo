@@ -201,11 +201,15 @@ test-integration:
 		$(MAKE) test-integration-local
 
 
+# Helper target to set up SKOPEO_BINARY variable for local test targets
+.eval-skopeo-binary: $(if $(SKOPEO_BINARY),,bin/skopeo)
+	$(eval SKOPEO_BINARY := $(or $(SKOPEO_BINARY),./bin/skopeo))
+	@echo "Testing with $(SKOPEO_BINARY) ..."
+
 # Primarily intended for CI.
-test-integration-local: bin/skopeo
+test-integration-local: .eval-skopeo-binary
 	hack/warn-destructive-tests.sh
-	$(MAKE) PREFIX=/usr install
-	cd ./integration && $(GO) test $(SKOPEO_LDFLAGS) $(TESTFLAGS) $(if $(BUILDTAGS),-tags "$(BUILDTAGS)")
+	cd ./integration && SKOPEO_BINARY="$(abspath $(SKOPEO_BINARY))" $(GO) test $(SKOPEO_LDFLAGS) $(TESTFLAGS) $(if $(BUILDTAGS),-tags "$(BUILDTAGS)")
 
 # complicated set of options needed to run podman-in-podman
 test-system:
@@ -220,9 +224,8 @@ test-system:
 	exit $$rc
 
 # Primarily intended for CI.
-test-system-local: $(if $(SKOPEO_BINARY),,bin/skopeo)
+test-system-local: .eval-skopeo-binary
 	hack/warn-destructive-tests.sh
-	@echo "Testing with $(or $(SKOPEO_BINARY),$(eval SKOPEO_BINARY := "bin/skopeo")$(SKOPEO_BINARY)) ..."
 	bats --tap systemtest
 
 test-unit:
