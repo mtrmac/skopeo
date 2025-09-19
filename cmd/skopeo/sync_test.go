@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -62,17 +63,11 @@ func TestSync(t *testing.T) {
 
 // TestSyncTLSPrecedence validates the interactions of tls-verify in YAML and --src-tls-verify in the CLI.
 func TestSyncTLSPrecedence(t *testing.T) {
-	baseRegistry := "example.com"
-	imageName := "repo"
-	cfgBase := registrySyncConfig{
-		Images: map[string][]string{imageName: {"latest"}}, // avoid network
-	}
-
 	for _, tt := range []struct {
 		name               string
 		incomingSkip       types.OptionalBool
 		incomingDaemonSkip bool
-		yamlSkip           types.OptionalBool // OptionalBoolUndefined means YAML omitted
+		yaml               string
 		wantSkip           types.OptionalBool
 		wantDaemonSkip     bool
 	}{
@@ -80,7 +75,7 @@ func TestSyncTLSPrecedence(t *testing.T) {
 			name:               "YAML omitted preserves incoming skip=true",
 			incomingSkip:       types.OptionalBoolTrue,
 			incomingDaemonSkip: true,
-			yamlSkip:           types.OptionalBoolUndefined,
+			yaml:               `# nothing`,
 			wantSkip:           types.OptionalBoolTrue,
 			wantDaemonSkip:     true,
 		},
@@ -88,7 +83,7 @@ func TestSyncTLSPrecedence(t *testing.T) {
 			name:               "YAML omitted preserves incoming skip=false (CLI pass verify)",
 			incomingSkip:       types.OptionalBoolFalse,
 			incomingDaemonSkip: false,
-			yamlSkip:           types.OptionalBoolUndefined,
+			yaml:               `# nothing`,
 			wantSkip:           types.OptionalBoolFalse,
 			wantDaemonSkip:     false,
 		},
@@ -96,7 +91,7 @@ func TestSyncTLSPrecedence(t *testing.T) {
 			name:               "YAML omitted preserves daemon skip=true while docker skip=undefined",
 			incomingSkip:       types.OptionalBoolUndefined,
 			incomingDaemonSkip: true,
-			yamlSkip:           types.OptionalBoolUndefined,
+			yaml:               `# nothing`,
 			wantSkip:           types.OptionalBoolUndefined,
 			wantDaemonSkip:     true,
 		},
@@ -104,7 +99,7 @@ func TestSyncTLSPrecedence(t *testing.T) {
 			name:               "YAML omitted preserves mismatched incoming (docker skip=true, daemon skip=false)",
 			incomingSkip:       types.OptionalBoolTrue,
 			incomingDaemonSkip: false,
-			yamlSkip:           types.OptionalBoolUndefined,
+			yaml:               `# nothing`,
 			wantSkip:           types.OptionalBoolTrue,
 			wantDaemonSkip:     false,
 		},
@@ -112,7 +107,7 @@ func TestSyncTLSPrecedence(t *testing.T) {
 			name:               "YAML tls-verify:true enforces verification",
 			incomingSkip:       types.OptionalBoolTrue,
 			incomingDaemonSkip: true,
-			yamlSkip:           types.OptionalBoolFalse,
+			yaml:               "tls-verify: true",
 			wantSkip:           types.OptionalBoolFalse,
 			wantDaemonSkip:     false,
 		},
@@ -120,7 +115,7 @@ func TestSyncTLSPrecedence(t *testing.T) {
 			name:               "YAML tls-verify:false disables verification",
 			incomingSkip:       types.OptionalBoolFalse,
 			incomingDaemonSkip: false,
-			yamlSkip:           types.OptionalBoolTrue,
+			yaml:               "tls-verify: false",
 			wantSkip:           types.OptionalBoolTrue,
 			wantDaemonSkip:     true,
 		},
@@ -130,10 +125,17 @@ func TestSyncTLSPrecedence(t *testing.T) {
 				DockerInsecureSkipTLSVerify:       tt.incomingSkip,
 				DockerDaemonInsecureSkipTLSVerify: tt.incomingDaemonSkip,
 			}
-			cfg := cfgBase
-			cfg.TLSVerify = tlsVerifyConfig{skip: tt.yamlSkip}
+			var cfg registrySyncConfig
+			err := yaml.Unmarshal(fmt.Appendf(nil, `
+%s
+images:
+  repo: # Specifying an explicit repo+tag avoids imagesToCopyFromRegistry trying to contact the registry.
+    - latest
+`, tt.yaml,
+			), &cfg)
+			require.NoError(t, err)
 
-			descs, err := imagesToCopyFromRegistry(baseRegistry, cfg, src)
+			descs, err := imagesToCopyFromRegistry("example.com", cfg, src)
 			require.NoError(t, err)
 			require.NotEmpty(t, descs)
 			ctx := descs[0].Context
