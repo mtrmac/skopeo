@@ -69,36 +69,11 @@ func TestSyncTLSPrecedence(t *testing.T) {
 		wantSkip       types.OptionalBool
 		wantDaemonSkip bool
 	}{
-		{
-			cli:            "--src-tls-verify=false",
-			yaml:           `# nothing`,
-			wantSkip:       types.OptionalBoolTrue,
-			wantDaemonSkip: true,
-		},
-		{
-			cli:            "--src-tls-verify=true",
-			yaml:           `# nothing`,
-			wantSkip:       types.OptionalBoolFalse,
-			wantDaemonSkip: false,
-		},
-		{
-			cli:            "",
-			yaml:           `# nothing`,
-			wantSkip:       types.OptionalBoolUndefined,
-			wantDaemonSkip: false,
-		},
-		{
-			cli:            "--src-tls-verify=false",
-			yaml:           "tls-verify: true",
-			wantSkip:       types.OptionalBoolFalse,
-			wantDaemonSkip: false,
-		},
-		{
-			cli:            "--src-tls-verify=true",
-			yaml:           "tls-verify: false",
-			wantSkip:       types.OptionalBoolTrue,
-			wantDaemonSkip: true,
-		},
+		{"--src-tls-verify=false", `# nothing`, types.OptionalBoolTrue, true},
+		{"--src-tls-verify=true", `# nothing`, types.OptionalBoolFalse, false},
+		{"", `# nothing`, types.OptionalBoolUndefined, false},
+		{"--src-tls-verify=false", "tls-verify: true", types.OptionalBoolFalse, false},
+		{"--src-tls-verify=true", "tls-verify: false", types.OptionalBoolTrue, true},
 	} {
 		t.Run(fmt.Sprintf("%#v + %q", tt.cli, tt.yaml), func(t *testing.T) {
 			opts := fakeImageOptions(t, "src-", true, []string{}, []string{tt.cli})
