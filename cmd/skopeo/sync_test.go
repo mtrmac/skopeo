@@ -64,49 +64,43 @@ func TestSync(t *testing.T) {
 // TestSyncTLSPrecedence validates the interactions of tls-verify in YAML and --src-tls-verify in the CLI.
 func TestSyncTLSPrecedence(t *testing.T) {
 	for _, tt := range []struct {
-		name           string
 		cli            string
 		yaml           string
 		wantSkip       types.OptionalBool
 		wantDaemonSkip bool
 	}{
 		{
-			name:           "YAML omitted preserves incoming skip=true",
 			cli:            "--src-tls-verify=false",
 			yaml:           `# nothing`,
 			wantSkip:       types.OptionalBoolTrue,
 			wantDaemonSkip: true,
 		},
 		{
-			name:           "YAML omitted preserves incoming skip=false (CLI pass verify)",
 			cli:            "--src-tls-verify=true",
 			yaml:           `# nothing`,
 			wantSkip:       types.OptionalBoolFalse,
 			wantDaemonSkip: false,
 		},
 		{
-			name:           "YAML omitted preserves + no CLI = defaults",
 			cli:            "",
 			yaml:           `# nothing`,
 			wantSkip:       types.OptionalBoolUndefined,
 			wantDaemonSkip: false,
 		},
 		{
-			name:           "YAML tls-verify:true enforces verification",
 			cli:            "--src-tls-verify=false",
 			yaml:           "tls-verify: true",
 			wantSkip:       types.OptionalBoolFalse,
 			wantDaemonSkip: false,
 		},
 		{
-			name:           "YAML tls-verify:false disables verification",
 			cli:            "--src-tls-verify=true",
 			yaml:           "tls-verify: false",
 			wantSkip:       types.OptionalBoolTrue,
 			wantDaemonSkip: true,
 		},
 	} {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%#v + %q", tt.cli, tt.yaml), func(t *testing.T) {
 			opts := fakeImageOptions(t, "src-", true, []string{}, []string{tt.cli})
 			sourceCtx, err := opts.newSystemContext()
 			require.NoError(t, err)
