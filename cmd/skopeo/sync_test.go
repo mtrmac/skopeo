@@ -60,18 +60,15 @@ func TestSync(t *testing.T) {
 	// Actual feature tests exist in integration and systemtest
 }
 
-// TestTLSPrecedence_YAMLOmitted verifies that when YAML omits tls-verify,
-// imagesToCopyFromRegistry preserves the incoming SystemContext values
-// (e.g., from CLI/global flags) for both DockerInsecureSkipTLSVerify and
-// DockerDaemonInsecureSkipTLSVerify.
-func TestTLSPrecedence_YAMLOmitted(t *testing.T) {
+// TestSyncTLSPrecedence validates the interactions of tls-verify in YAML and --src-tls-verify in the CLI.
+func TestSyncTLSPrecedence(t *testing.T) {
 	baseRegistry := "example.com"
 	imageName := "repo"
 	cfgBase := registrySyncConfig{
 		Images: map[string][]string{imageName: {"latest"}}, // avoid network
 	}
 
-	tests := []struct {
+	for _, tt := range []struct {
 		name               string
 		incomingSkip       types.OptionalBool
 		incomingDaemonSkip bool
@@ -111,46 +108,6 @@ func TestTLSPrecedence_YAMLOmitted(t *testing.T) {
 			wantSkip:           types.OptionalBoolTrue,
 			wantDaemonSkip:     false,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			src := types.SystemContext{
-				DockerInsecureSkipTLSVerify:       tt.incomingSkip,
-				DockerDaemonInsecureSkipTLSVerify: tt.incomingDaemonSkip,
-			}
-			cfg := cfgBase
-			cfg.TLSVerify = tlsVerifyConfig{skip: tt.yamlSkip}
-
-			descs, err := imagesToCopyFromRegistry(baseRegistry, cfg, src)
-			require.NoError(t, err)
-			require.NotEmpty(t, descs)
-			ctx := descs[0].Context
-			require.NotNil(t, ctx)
-			assert.Equal(t, tt.wantSkip, ctx.DockerInsecureSkipTLSVerify)
-			assert.Equal(t, tt.wantDaemonSkip, ctx.DockerDaemonInsecureSkipTLSVerify)
-		})
-	}
-}
-
-// TestTLSPrecedence_YAMLSpecified verifies that when YAML explicitly specifies
-// tls-verify, it overrides incoming SystemContext values (e.g., CLI/global flags)
-// for both DockerInsecureSkipTLSVerify and DockerDaemonInsecureSkipTLSVerify.
-func TestTLSPrecedence_YAMLSpecified(t *testing.T) {
-	baseRegistry := "example.com"
-	imageName := "repo"
-	cfgBase := registrySyncConfig{
-		Images: map[string][]string{imageName: {"latest"}}, // avoid network
-	}
-
-	tests := []struct {
-		name               string
-		incomingSkip       types.OptionalBool
-		incomingDaemonSkip bool
-		yamlSkip           types.OptionalBool // YAML explicitly sets this
-		wantSkip           types.OptionalBool
-		wantDaemonSkip     bool
-	}{
 		{
 			name:               "YAML tls-verify:true enforces verification",
 			incomingSkip:       types.OptionalBoolTrue,
@@ -167,9 +124,7 @@ func TestTLSPrecedence_YAMLSpecified(t *testing.T) {
 			wantSkip:           types.OptionalBoolTrue,
 			wantDaemonSkip:     true,
 		},
-	}
-
-	for _, tt := range tests {
+	} {
 		t.Run(tt.name, func(t *testing.T) {
 			src := types.SystemContext{
 				DockerInsecureSkipTLSVerify:       tt.incomingSkip,
