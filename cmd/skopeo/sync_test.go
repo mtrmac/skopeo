@@ -64,69 +64,54 @@ func TestSync(t *testing.T) {
 // TestSyncTLSPrecedence validates the interactions of tls-verify in YAML and --src-tls-verify in the CLI.
 func TestSyncTLSPrecedence(t *testing.T) {
 	for _, tt := range []struct {
-		name               string
-		incomingSkip       types.OptionalBool
-		incomingDaemonSkip bool
-		yaml               string
-		wantSkip           types.OptionalBool
-		wantDaemonSkip     bool
+		name           string
+		cli            string
+		yaml           string
+		wantSkip       types.OptionalBool
+		wantDaemonSkip bool
 	}{
 		{
-			name:               "YAML omitted preserves incoming skip=true",
-			incomingSkip:       types.OptionalBoolTrue,
-			incomingDaemonSkip: true,
-			yaml:               `# nothing`,
-			wantSkip:           types.OptionalBoolTrue,
-			wantDaemonSkip:     true,
+			name:           "YAML omitted preserves incoming skip=true",
+			cli:            "--src-tls-verify=false",
+			yaml:           `# nothing`,
+			wantSkip:       types.OptionalBoolTrue,
+			wantDaemonSkip: true,
 		},
 		{
-			name:               "YAML omitted preserves incoming skip=false (CLI pass verify)",
-			incomingSkip:       types.OptionalBoolFalse,
-			incomingDaemonSkip: false,
-			yaml:               `# nothing`,
-			wantSkip:           types.OptionalBoolFalse,
-			wantDaemonSkip:     false,
+			name:           "YAML omitted preserves incoming skip=false (CLI pass verify)",
+			cli:            "--src-tls-verify=true",
+			yaml:           `# nothing`,
+			wantSkip:       types.OptionalBoolFalse,
+			wantDaemonSkip: false,
 		},
 		{
-			name:               "YAML omitted preserves daemon skip=true while docker skip=undefined",
-			incomingSkip:       types.OptionalBoolUndefined,
-			incomingDaemonSkip: true,
-			yaml:               `# nothing`,
-			wantSkip:           types.OptionalBoolUndefined,
-			wantDaemonSkip:     true,
+			name:           "YAML omitted preserves + no CLI = defaults",
+			cli:            "",
+			yaml:           `# nothing`,
+			wantSkip:       types.OptionalBoolUndefined,
+			wantDaemonSkip: false,
 		},
 		{
-			name:               "YAML omitted preserves mismatched incoming (docker skip=true, daemon skip=false)",
-			incomingSkip:       types.OptionalBoolTrue,
-			incomingDaemonSkip: false,
-			yaml:               `# nothing`,
-			wantSkip:           types.OptionalBoolTrue,
-			wantDaemonSkip:     false,
+			name:           "YAML tls-verify:true enforces verification",
+			cli:            "--src-tls-verify=false",
+			yaml:           "tls-verify: true",
+			wantSkip:       types.OptionalBoolFalse,
+			wantDaemonSkip: false,
 		},
 		{
-			name:               "YAML tls-verify:true enforces verification",
-			incomingSkip:       types.OptionalBoolTrue,
-			incomingDaemonSkip: true,
-			yaml:               "tls-verify: true",
-			wantSkip:           types.OptionalBoolFalse,
-			wantDaemonSkip:     false,
-		},
-		{
-			name:               "YAML tls-verify:false disables verification",
-			incomingSkip:       types.OptionalBoolFalse,
-			incomingDaemonSkip: false,
-			yaml:               "tls-verify: false",
-			wantSkip:           types.OptionalBoolTrue,
-			wantDaemonSkip:     true,
+			name:           "YAML tls-verify:false disables verification",
+			cli:            "--src-tls-verify=true",
+			yaml:           "tls-verify: false",
+			wantSkip:       types.OptionalBoolTrue,
+			wantDaemonSkip: true,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			src := types.SystemContext{
-				DockerInsecureSkipTLSVerify:       tt.incomingSkip,
-				DockerDaemonInsecureSkipTLSVerify: tt.incomingDaemonSkip,
-			}
+			opts := fakeImageOptions(t, "src-", true, []string{}, []string{tt.cli})
+			sourceCtx, err := opts.newSystemContext()
+			require.NoError(t, err)
 			var cfg registrySyncConfig
-			err := yaml.Unmarshal(fmt.Appendf(nil, `
+			err = yaml.Unmarshal(fmt.Appendf(nil, `
 %s
 images:
   repo: # Specifying an explicit repo+tag avoids imagesToCopyFromRegistry trying to contact the registry.
@@ -135,7 +120,7 @@ images:
 			), &cfg)
 			require.NoError(t, err)
 
-			descs, err := imagesToCopyFromRegistry("example.com", cfg, src)
+			descs, err := imagesToCopyFromRegistry("example.com", cfg, *sourceCtx)
 			require.NoError(t, err)
 			require.NotEmpty(t, descs)
 			ctx := descs[0].Context
