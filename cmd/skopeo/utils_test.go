@@ -414,6 +414,30 @@ func TestSharedCopyOptionsCopyOptions(t *testing.T) {
 				ReportWriter:                     &someStdout,
 			},
 		},
+		{ // --sign-passphrase-file + --sign-by-sigstore-private-key work
+			options: []string{
+				"--sign-by-sigstore-private-key", "/some/key/path.private",
+				"--sign-passphrase-file", passphraseFile.Name(),
+			},
+			expected: copy.Options{
+				SignPassphrase:                   "test-passphrase",
+				SignBySigstorePrivateKeyFile:     "/some/key/path.private",
+				SignSigstorePrivateKeyPassphrase: []byte("test-passphrase"),
+				ReportWriter:                     &someStdout,
+			},
+		},
+		{ // --sign-passphrase-file + --sign-by-sigstore-private-key work with an empty passphrase
+			options: []string{
+				"--sign-by-sigstore-private-key", "/some/key/path.private",
+				"--sign-passphrase-file", "./fixtures/empty.passphrase",
+			},
+			expected: copy.Options{
+				SignPassphrase:                   "",
+				SignBySigstorePrivateKeyFile:     "/some/key/path.private",
+				SignSigstorePrivateKeyPassphrase: []byte(""),
+				ReportWriter:                     &someStdout,
+			},
+		},
 	}
 	// If Sequoia is supported, --sign-passphrase-file + --sign-by-sq-fingerprint work
 	if buildWithSequoia {
