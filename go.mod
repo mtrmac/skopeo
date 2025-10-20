@@ -1,7 +1,7 @@
 module github.com/containers/skopeo
 
 // Minimum required golang version
-go 1.24.0
+go 1.24.2
 
 // Warning: Ensure the "go" and "toolchain" versions match exactly to prevent unwanted auto-updates
 
@@ -17,7 +17,7 @@ require (
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/common v0.65.0
+	go.podman.io/common v0.66.0
 	go.podman.io/image/v5 v5.38.0
 	go.podman.io/storage v1.61.0
 	golang.org/x/term v0.36.0
