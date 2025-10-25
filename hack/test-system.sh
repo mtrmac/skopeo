@@ -37,4 +37,4 @@ EOF
     export CONTAINERS_STORAGE_CONF=/etc/containers/storage.conf
 fi
 
-SKOPEO_BINARY="$SKOPEO_BINARY" bats --tap systemtest
+bats --tap systemtest
