@@ -11,7 +11,7 @@ require (
 	github.com/docker/distribution v2.8.3+incompatible
 	github.com/moby/sys/capability v0.4.0
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/opencontainers/image-spec v1.1.2-0.20250906041507-6519a62d628e
+	github.com/opencontainers/image-spec v1.1.2-0.20251016170850-26647a49f642
 	github.com/opencontainers/image-tools v1.0.0-rc3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.10.1
