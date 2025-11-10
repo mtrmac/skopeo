@@ -146,7 +146,7 @@ func (s *syncSuite) TestDocker2DirTagged() {
 	require.NoError(t, err)
 
 	// copy docker => dir
-	assertSkopeoSucceeds(t, "", "copy", "docker://"+image, "dir:"+dir2)
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "docker://"+image, "dir:"+dir2)
 	_, err = os.Stat(path.Join(dir2, "manifest.json"))
 	require.NoError(t, err)
 
@@ -173,7 +173,7 @@ func (s *syncSuite) TestDocker2DirTaggedAll() {
 	require.NoError(t, err)
 
 	// copy docker => dir
-	assertSkopeoSucceeds(t, "", "copy", "--all", "docker://"+image, "dir:"+dir2)
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "--all", "docker://"+image, "dir:"+dir2)
 	_, err = os.Stat(path.Join(dir2, "manifest.json"))
 	require.NoError(t, err)
 
@@ -189,11 +189,12 @@ func (s *syncSuite) TestPreserveDigests() {
 	image := pullableTaggedManifestList
 
 	// copy docker => dir
-	assertSkopeoSucceeds(t, "", "copy", "--all", "--preserve-digests", "docker://"+image, "dir:"+tmpDir)
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "--all", "--preserve-digests", "docker://"+image, "dir:"+tmpDir)
 	_, err := os.Stat(path.Join(tmpDir, "manifest.json"))
 	require.NoError(t, err)
 
-	assertSkopeoFails(t, ".*Instructed to preserve digests.*", "copy", "--all", "--preserve-digests", "--format=oci", "docker://"+image, "dir:"+tmpDir)
+	assertSkopeoFails(t, ".*Instructed to preserve digests.*",
+		"copy", "--retry-times", "3", "--all", "--preserve-digests", "--format=oci", "docker://"+image, "dir:"+tmpDir)
 }
 
 func (s *syncSuite) TestScoped() {
@@ -223,7 +224,7 @@ func (s *syncSuite) TestDirIsNotOverwritten() {
 	imagePath := imageRef.DockerReference().String()
 
 	// make a copy of the image in the local registry
-	assertSkopeoSucceeds(t, "", "copy", "--dest-tls-verify=false", "docker://"+image, "docker://"+path.Join(v2DockerRegistryURL, reference.Path(imageRef.DockerReference())))
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "--dest-tls-verify=false", "docker://"+image, "docker://"+path.Join(v2DockerRegistryURL, reference.Path(imageRef.DockerReference())))
 
 	//sync upstream image to dir, not scoped
 	dir1 := t.TempDir()
@@ -405,7 +406,7 @@ func (s *syncSuite) TestYamlTLSVerify() {
 
 	// FIXME: It would be nice to use one of the local Docker registries instead of needing an Internet connection.
 	// copy docker => docker
-	assertSkopeoSucceeds(t, "", "copy", "--dest-tls-verify=false", "docker://"+image+":"+tag, localRegURL+image+":"+tag)
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "--dest-tls-verify=false", "docker://"+image+":"+tag, localRegURL+image+":"+tag)
 
 	yamlTemplate := `
 %s:
@@ -488,7 +489,7 @@ func (s *syncSuite) TestDocker2DockerTagged() {
 	assertSkopeoSucceeds(t, "", "sync", "--scoped", "--dest-tls-verify=false", "--src", "docker", "--dest", "docker", image, v2DockerRegistryURL)
 
 	// copy docker => dir
-	assertSkopeoSucceeds(t, "", "copy", "docker://"+image, "dir:"+dir1)
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "docker://"+image, "dir:"+dir1)
 	_, err = os.Stat(path.Join(dir1, "manifest.json"))
 	require.NoError(t, err)
 
@@ -522,7 +523,7 @@ func (s *syncSuite) TestDir2DockerTagged() {
 	require.NoError(t, err)
 
 	// copy docker => dir
-	assertSkopeoSucceeds(t, "", "copy", "docker://"+image, "dir:"+path.Join(dir1, image))
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "docker://"+image, "dir:"+path.Join(dir1, image))
 	_, err = os.Stat(path.Join(dir1, image, "manifest.json"))
 	require.NoError(t, err)
 
