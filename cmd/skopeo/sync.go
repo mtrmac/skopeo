@@ -182,7 +182,7 @@ func destinationReference(destination string, transport string) (types.ImageRefe
 			return nil, fmt.Errorf("Destination directory could not be used: %w", err)
 		}
 		// the directory holding the image must be created here
-		if err = os.MkdirAll(destination, 0755); err != nil {
+		if err = os.MkdirAll(destination, 0o755); err != nil {
 			return nil, fmt.Errorf("Error creating directory for image %s: %w", destination, err)
 		}
 		imageTransport = directory.Transport
@@ -270,7 +270,6 @@ func imagesToCopyFromDir(dirPath string) ([]types.ImageReference, error) {
 		}
 		return nil
 	})
-
 	if err != nil {
 		return sourceReferences,
 			fmt.Errorf("Error walking the path %q: %w", dirPath, err)
@@ -367,7 +366,8 @@ func imagesToCopyFromRegistry(registryName string, cfg registrySyncConfig, sourc
 		}
 		repoDescList = append(repoDescList, repoDescriptor{
 			ImageRefs: sourceReferences,
-			Context:   serverCtx})
+			Context:   serverCtx,
+		})
 	}
 
 	// include repository descriptors for cfg.ImagesByTagRegex
@@ -667,7 +667,7 @@ func (opts *syncOptions) run(args []string, stdout io.Writer) (retErr error) {
 
 	var digestFile *os.File
 	if opts.digestFile != "" && !opts.dryRun {
-		digestFile, err = os.OpenFile(opts.digestFile, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
+		digestFile, err = os.OpenFile(opts.digestFile, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0o644)
 		if err != nil {
 			return fmt.Errorf("Error creating digest file: %w", err)
 		}

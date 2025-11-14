@@ -45,7 +45,8 @@ func copyCmd(global *globalOptions) *cobra.Command {
 	destFlags, destOpts := imageDestFlags(global, sharedOpts, deprecatedTLSVerifyOpt, "dest-", "dcreds")
 	retryFlags, retryOpts := retryFlags()
 	copyFlags, copyOpts := sharedCopyFlags()
-	opts := copyOptions{global: global,
+	opts := copyOptions{
+		global:              global,
 		deprecatedTLSVerify: deprecatedTLSVerifyOpt,
 		srcImage:            srcOpts,
 		destImage:           destOpts,
@@ -251,7 +252,7 @@ func (opts *copyOptions) run(args []string, stdout io.Writer) (retErr error) {
 			if err != nil {
 				return err
 			}
-			if err = os.WriteFile(opts.digestFile, []byte(manifestDigest.String()), 0644); err != nil {
+			if err = os.WriteFile(opts.digestFile, []byte(manifestDigest.String()), 0o644); err != nil {
 				return fmt.Errorf("Failed to write digest to file %q: %w", opts.digestFile, err)
 			}
 		}

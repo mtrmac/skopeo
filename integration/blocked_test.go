@@ -1,7 +1,9 @@
 package main
 
-const blockedRegistriesConf = "./fixtures/blocked-registries.conf"
-const blockedErrorRegex = `.*registry registry-blocked.com is blocked in .*`
+const (
+	blockedRegistriesConf = "./fixtures/blocked-registries.conf"
+	blockedErrorRegex     = `.*registry registry-blocked.com is blocked in .*`
+)
 
 func (s *skopeoSuite) TestCopyBlockedSource() {
 	t := s.T()

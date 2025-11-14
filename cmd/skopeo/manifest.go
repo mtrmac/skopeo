@@ -10,8 +10,7 @@ import (
 	"go.podman.io/image/v5/manifest"
 )
 
-type manifestDigestOptions struct {
-}
+type manifestDigestOptions struct{}
 
 func manifestDigestCmd() *cobra.Command {
 	var opts manifestDigestOptions

@@ -61,7 +61,7 @@ func (opts *standaloneSignOptions) run(args []string, stdout io.Writer) error {
 		return fmt.Errorf("Error creating signature: %w", err)
 	}
 
-	if err := os.WriteFile(opts.output, signature, 0644); err != nil {
+	if err := os.WriteFile(opts.output, signature, 0o644); err != nil {
 		return fmt.Errorf("Error writing signature to %s: %w", opts.output, err)
 	}
 	return nil
@@ -118,7 +118,6 @@ func (opts *standaloneVerifyOptions) run(args []string, stdout io.Writer) error 
 		mech, publicKeyfingerprints, err = signature.NewEphemeralGPGSigningMechanism(publicKeys)
 		if err != nil {
 			return fmt.Errorf("Error initializing GPG: %w", err)
-
 		}
 	} else {
 		mech, err = signature.NewGPGSigningMechanism()
@@ -147,8 +146,7 @@ func (opts *standaloneVerifyOptions) run(args []string, stdout io.Writer) error 
 // (including things like “✅ Verified by $authority”)
 //
 // The subcommand is undocumented, and it may be renamed or entirely disappear in the future.
-type untrustedSignatureDumpOptions struct {
-}
+type untrustedSignatureDumpOptions struct{}
 
 func untrustedSignatureDumpCmd() *cobra.Command {
 	opts := untrustedSignatureDumpOptions{}

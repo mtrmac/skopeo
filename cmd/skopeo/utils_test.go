@@ -49,7 +49,8 @@ func fakeGlobalOptions(t *testing.T, flags []string) (*globalOptions, *cobra.Com
 
 // fakeImageOptions creates imageOptions and sets it according to globalFlags/cmdFlags.
 func fakeImageOptions(t *testing.T, flagPrefix string, useDeprecatedTLSVerify bool,
-	globalFlags []string, cmdFlags []string) *imageOptions {
+	globalFlags []string, cmdFlags []string,
+) *imageOptions {
 	globalOpts, cmd := fakeGlobalOptions(t, globalFlags)
 	sharedFlags, sharedOpts := sharedImageFlags()
 	var deprecatedTLSVerifyFlag pflag.FlagSet
@@ -124,7 +125,8 @@ func TestImageOptionsNewSystemContext(t *testing.T) {
 
 // fakeImageDestOptions creates imageDestOptions and sets it according to globalFlags/cmdFlags.
 func fakeImageDestOptions(t *testing.T, flagPrefix string, useDeprecatedTLSVerify bool,
-	globalFlags []string, cmdFlags []string) *imageDestOptions {
+	globalFlags []string, cmdFlags []string,
+) *imageDestOptions {
 	globalOpts, cmd := fakeGlobalOptions(t, globalFlags)
 	sharedFlags, sharedOpts := sharedImageFlags()
 	var deprecatedTLSVerifyFlag pflag.FlagSet
@@ -389,7 +391,8 @@ func TestSharedCopyOptionsCopyOptions(t *testing.T) {
 		// to create test keys for that.
 		// This does not test --sign-by-sq-fingerprint, because that needs to be conditional based on buildWithSequoia.
 		{
-			options: []string{"--remove-signatures",
+			options: []string{
+				"--remove-signatures",
 				"--sign-by", "gpgFingerprint",
 				"--format", "oci",
 				"--preserve-digests",
@@ -488,21 +491,31 @@ func TestParseManifestFormat(t *testing.T) {
 		expectedManifestType string
 		expectErr            bool
 	}{
-		{"oci",
+		{
+			"oci",
 			imgspecv1.MediaTypeImageManifest,
-			false},
-		{"v2s1",
+			false,
+		},
+		{
+			"v2s1",
 			manifest.DockerV2Schema1SignedMediaType,
-			false},
-		{"v2s2",
+			false,
+		},
+		{
+			"v2s2",
 			manifest.DockerV2Schema2MediaType,
-			false},
-		{"",
+			false,
+		},
+		{
 			"",
-			true},
-		{"badValue",
 			"",
-			true},
+			true,
+		},
+		{
+			"badValue",
+			"",
+			true,
+		},
 	} {
 		manifestType, err := parseManifestFormat(testCase.formatParam)
 		if testCase.expectErr {
@@ -523,28 +536,37 @@ func TestImageOptionsAuthfileOverride(t *testing.T) {
 		expectedAuthfilePath string
 	}{
 		// if there is no prefix, only authfile is allowed.
-		{"",
+		{
+			"",
 			[]string{
 				"--authfile", "/srv/authfile",
-			}, "/srv/authfile"},
+			},
+			"/srv/authfile",
+		},
 		// if authfile and dest-authfile is provided, dest-authfile wins
-		{"dest-",
+		{
+			"dest-",
 			[]string{
 				"--authfile", "/srv/authfile",
 				"--dest-authfile", "/srv/dest-authfile",
-			}, "/srv/dest-authfile",
+			},
+			"/srv/dest-authfile",
 		},
 		// if only the shared authfile is provided, authfile must be present in system context
-		{"dest-",
+		{
+			"dest-",
 			[]string{
 				"--authfile", "/srv/authfile",
-			}, "/srv/authfile",
+			},
+			"/srv/authfile",
 		},
 		// if only the dest authfile is provided, dest-authfile must be present in system context
-		{"dest-",
+		{
+			"dest-",
 			[]string{
 				"--dest-authfile", "/srv/dest-authfile",
-			}, "/srv/dest-authfile",
+			},
+			"/srv/dest-authfile",
 		},
 	} {
 		opts := fakeImageOptions(t, testCase.flagPrefix, false, []string{}, testCase.cmdFlags)

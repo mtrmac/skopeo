@@ -224,7 +224,6 @@ func (p *proxy) callGetRawBlob(args []any) (rval any, buf []byte, err error) {
 			content: buf,
 			err:     err,
 		}
-
 	}()
 	wg.Add(1)
 	go func() {
