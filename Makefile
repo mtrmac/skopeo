@@ -242,10 +242,13 @@ validate:
 # This target is only intended for development, e.g. executing it from an IDE. Use (make test) for CI or pre-release testing.
 test-all-local: validate-local validate-docs test-unit-local
 
+.PHONY: fmt
+fmt: tools
+	$(GOBIN)/golangci-lint fmt
+
 .PHONY: validate-local
 validate-local: tools
 	hack/validate-git-marks.sh
-	hack/validate-gofmt.sh
 	$(GOBIN)/golangci-lint run --build-tags "${BUILDTAGS}"
 	# An extra run with --tests=false allows detecting code unused outside of tests;
 	# ideally the linter should be able to find this automatically.
