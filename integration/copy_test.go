@@ -48,8 +48,10 @@ type copySuite struct {
 	gpgHome    string
 }
 
-var _ = suite.SetupAllSuite(&copySuite{})
-var _ = suite.TearDownAllSuite(&copySuite{})
+var (
+	_ = suite.SetupAllSuite(&copySuite{})
+	_ = suite.TearDownAllSuite(&copySuite{})
+)
 
 func (s *copySuite) SetupSuite() {
 	t := s.T()
@@ -85,7 +87,7 @@ func (s *copySuite) SetupSuite() {
 
 		out := combinedOutputOfCommand(t, gpgBinary, "--armor", "--export", fmt.Sprintf("%s@example.com", key))
 		err := os.WriteFile(filepath.Join(s.gpgHome, fmt.Sprintf("%s-pubkey.gpg", key)),
-			[]byte(out), 0600)
+			[]byte(out), 0o600)
 		require.NoError(t, err)
 	}
 }
@@ -541,9 +543,9 @@ func (s *copySuite) TestCopyEncryption() {
 	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
 	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
 	require.NoError(t, err)
-	err = os.WriteFile(keysDir+"/private.key", privateKeyBytes, 0644)
+	err = os.WriteFile(keysDir+"/private.key", privateKeyBytes, 0o644)
 	require.NoError(t, err)
-	err = os.WriteFile(keysDir+"/public.key", publicKeyBytes, 0644)
+	err = os.WriteFile(keysDir+"/public.key", publicKeyBytes, 0o644)
 	require.NoError(t, err)
 
 	// We can either perform encryption or decryption on the image.
@@ -568,7 +570,7 @@ func (s *copySuite) TestCopyEncryption() {
 	invalidPrivateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	require.NoError(t, err)
 	invalidPrivateKeyBytes := x509.MarshalPKCS1PrivateKey(invalidPrivateKey)
-	err = os.WriteFile(keysDir+"/invalid_private.key", invalidPrivateKeyBytes, 0644)
+	err = os.WriteFile(keysDir+"/invalid_private.key", invalidPrivateKeyBytes, 0o644)
 	require.NoError(t, err)
 	assertSkopeoFails(t, ".*no suitable key unwrapper found or none of the private keys could be used for decryption.*",
 		"copy", "--decryption-key", keysDir+"/invalid_private.key",
@@ -604,7 +606,6 @@ func (s *copySuite) TestCopyEncryption() {
 
 	// After successful decryption we should find the gzipped layers from the nginx image
 	matchLayerBlobBinaryType(t, partiallyDecryptedImgDir+"/blobs/sha256", "application/x-gzip", 3)
-
 }
 
 func matchLayerBlobBinaryType(t *testing.T, ociImageDirPath string, contentType string, matchCount int) {
@@ -818,7 +819,7 @@ func (s *copySuite) TestCopyDirSignatures() {
 	topDirDest := "dir:" + topDir
 
 	for _, suffix := range []string{"/dir1", "/dir2", "/restricted/personal", "/restricted/official", "/restricted/badidentity", "/dest"} {
-		err := os.MkdirAll(topDir+suffix, 0755)
+		err := os.MkdirAll(topDir+suffix, 0o755)
 		require.NoError(t, err)
 	}
 
@@ -900,7 +901,7 @@ func (s *copySuite) TestCopyCompression() {
 		{"uncompressed-image-s2", "atomic:localhost:5000/myns/compression:s2"},
 	} {
 		dir := filepath.Join(topDir, fmt.Sprintf("case%d", i))
-		err := os.MkdirAll(dir, 0755)
+		err := os.MkdirAll(dir, 0o755)
 		require.NoError(t, err)
 
 		assertSkopeoSucceeds(t, "", "--tls-verify=false", "copy", "dir:fixtures/"+c.fixture, c.remote)
@@ -953,7 +954,7 @@ func (s *copySuite) TestCopyDockerLookaside() {
 
 	tmpDir := t.TempDir()
 	copyDest := filepath.Join(tmpDir, "dest")
-	err = os.Mkdir(copyDest, 0755)
+	err = os.Mkdir(copyDest, 0o755)
 	require.NoError(t, err)
 	dirDest := "dir:" + copyDest
 	plainLookaside := filepath.Join(tmpDir, "lookaside")
@@ -967,7 +968,7 @@ func (s *copySuite) TestCopyDockerLookaside() {
 
 	policy := s.policyFixture(nil)
 	registriesDir := filepath.Join(tmpDir, "registries.d")
-	err = os.Mkdir(registriesDir, 0755)
+	err = os.Mkdir(registriesDir, 0o755)
 	require.NoError(t, err)
 	registriesFile := fileFromFixture(t, "fixtures/registries.yaml",
 		map[string]string{"@lookaside@": plainLookaside, "@split-staging@": splitLookasideStaging, "@split-read@": splitLookasideReadServer.URL})
@@ -1020,7 +1021,7 @@ func (s *copySuite) TestCopyAtomicExtension() {
 
 	topDir := t.TempDir()
 	for _, subdir := range []string{"dirAA", "dirAD", "dirDA", "dirDD", "registries.d"} {
-		err := os.MkdirAll(filepath.Join(topDir, subdir), 0755)
+		err := os.MkdirAll(filepath.Join(topDir, subdir), 0o755)
 		require.NoError(t, err)
 	}
 	registriesDir := filepath.Join(topDir, "registries.d")
@@ -1213,7 +1214,7 @@ func (s *copySuite) TestCopyPreserveDigests() {
 func (s *copySuite) testCopySchemaConversionRegistries(t *testing.T, schema1Registry, schema2Registry string) {
 	topDir := t.TempDir()
 	for _, subdir := range []string{"input1", "input2", "dest2"} {
-		err := os.MkdirAll(filepath.Join(topDir, subdir), 0755)
+		err := os.MkdirAll(filepath.Join(topDir, subdir), 0o755)
 		require.NoError(t, err)
 	}
 	input1Dir := filepath.Join(topDir, "input1")

@@ -24,7 +24,7 @@ func TestGenerateSigstoreKey(t *testing.T) {
 	for _, suffix := range outputSuffixes {
 		dir := t.TempDir()
 		prefix := filepath.Join(dir, "prefix")
-		err := os.WriteFile(prefix+suffix, []byte{}, 0600)
+		err := os.WriteFile(prefix+suffix, []byte{}, 0o600)
 		require.NoError(t, err)
 		out, err := runSkopeo("generate-sigstore-key",
 			"--output-prefix", prefix, "--passphrase-file", "/dev/null",
@@ -37,7 +37,7 @@ func TestGenerateSigstoreKey(t *testing.T) {
 	for _, suffix := range outputSuffixes {
 		dir := t.TempDir()
 		nonDirectory := filepath.Join(dir, "nondirectory")
-		err := os.WriteFile(nonDirectory, []byte{}, 0600)
+		err := os.WriteFile(nonDirectory, []byte{}, 0o600)
 		require.NoError(t, err)
 		prefix := filepath.Join(dir, "prefix")
 		err = os.Symlink(filepath.Join(nonDirectory, "unaccessible"), prefix+suffix)
@@ -66,7 +66,7 @@ func TestGenerateSigstoreKey(t *testing.T) {
 	dir := t.TempDir()
 	prefix := filepath.Join(dir, "prefix")
 	passphraseFile := filepath.Join(dir, "passphrase")
-	err = os.WriteFile(passphraseFile, []byte("some passphrase"), 0600)
+	err = os.WriteFile(passphraseFile, []byte("some passphrase"), 0o600)
 	require.NoError(t, err)
 	out, err = runSkopeo("generate-sigstore-key",
 		"--output-prefix", prefix, "--passphrase-file", passphraseFile,
@@ -75,5 +75,4 @@ func TestGenerateSigstoreKey(t *testing.T) {
 	for _, suffix := range outputSuffixes {
 		assert.Contains(t, out, prefix+suffix)
 	}
-
 }

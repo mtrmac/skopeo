@@ -11,8 +11,8 @@ import (
 // Tests the kinds of inputs allowed and expected to the command
 func TestDockerRepositoryReferenceParser(t *testing.T) {
 	for _, test := range [][]string{
-		{"docker://myhost.com:1000/nginx"}, //no tag
-		{"docker://myhost.com/nginx"},      //no port or tag
+		{"docker://myhost.com:1000/nginx"}, // no tag
+		{"docker://myhost.com/nginx"},      // no port or tag
 		{"docker://somehost.com"},          // Valid default expansion
 		{"docker://nginx"},                 // Valid default expansion
 	} {
@@ -31,8 +31,8 @@ func TestDockerRepositoryReferenceParser(t *testing.T) {
 		{"docker-daemon:myhost.com/someimage"},
 		{"docker://myhost.com:1000/nginx:foobar:foobar"},           // Invalid repository ref
 		{"docker://somehost.com:5000/"},                            // no repo
-		{"docker://myhost.com:1000/nginx:latest"},                  //tag not allowed
-		{"docker://myhost.com:1000/nginx@sha256:abcdef1234567890"}, //digest not allowed
+		{"docker://myhost.com:1000/nginx:latest"},                  // tag not allowed
+		{"docker://myhost.com:1000/nginx@sha256:abcdef1234567890"}, // digest not allowed
 	} {
 		_, err := parseDockerRepositoryReference(test[0])
 		assert.Error(t, err, test[0])
@@ -41,8 +41,8 @@ func TestDockerRepositoryReferenceParser(t *testing.T) {
 
 func TestDockerRepositoryReferenceParserDrift(t *testing.T) {
 	for _, test := range [][]string{
-		{"docker://myhost.com:1000/nginx", "myhost.com:1000/nginx"}, //no tag
-		{"docker://myhost.com/nginx", "myhost.com/nginx"},           //no port or tag
+		{"docker://myhost.com:1000/nginx", "myhost.com:1000/nginx"}, // no tag
+		{"docker://myhost.com/nginx", "myhost.com/nginx"},           // no port or tag
 		{"docker://somehost.com", "docker.io/library/somehost.com"}, // Valid default expansion
 		{"docker://nginx", "docker.io/library/nginx"},               // Valid default expansion
 	} {

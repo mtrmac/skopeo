@@ -29,9 +29,11 @@ var skopeoBinary = func() string {
 	return "skopeo"
 }()
 
-const testFQIN = "docker://quay.io/libpod/busybox" // tag left off on purpose, some tests need to add a special one
-const testFQIN64 = "docker://quay.io/libpod/busybox:amd64"
-const testFQINMultiLayer = "docker://quay.io/libpod/alpine_nginx:latest" // multi-layer
+const (
+	testFQIN           = "docker://quay.io/libpod/busybox" // tag left off on purpose, some tests need to add a special one
+	testFQIN64         = "docker://quay.io/libpod/busybox:amd64"
+	testFQINMultiLayer = "docker://quay.io/libpod/alpine_nginx:latest" // multi-layer
+)
 
 // consumeAndLogOutputStream takes (f, err) from an exec.*Pipe(), and causes all output to it to be logged to t.
 func consumeAndLogOutputStream(t *testing.T, id string, f io.ReadCloser, err error) {
