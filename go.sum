@@ -41,8 +41,8 @@ github.com/distribution/reference v0.6.0 h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5Qvfr
 github.com/distribution/reference v0.6.0/go.mod h1:BbU0aIcezP1/5jX/8MP0YiH4SdvB5Y4f/wlDRiLyi3E=
 github.com/dlclark/regexp2 v1.11.0 h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxKI=
 github.com/dlclark/regexp2 v1.11.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
-github.com/docker/cli v29.1.1+incompatible h1:gGQk5qx62yPKRm3bUdKBzmDBSQzp17hlSLbV1F7jjys=
-github.com/docker/cli v29.1.1+incompatible/go.mod h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=
+github.com/docker/cli v29.1.2+incompatible h1:s4QI7drXpIo78OM+CwuthPsO5kCf8cpNsck5PsLVTH8=
+github.com/docker/cli v29.1.2+incompatible/go.mod h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=
 github.com/docker/distribution v2.8.3+incompatible h1:AtKxIZ36LoNK51+Z6RpzLpddBirtxJnzDrHLEKxTAYk=
 github.com/docker/distribution v2.8.3+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
 github.com/docker/docker-credential-helpers v0.9.4 h1:76ItO69/AP/V4yT9V4uuuItG0B1N8hvt0T0c0NN/DzI=
@@ -100,8 +100,8 @@ github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLf
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/klauspost/compress v1.4.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
-github.com/klauspost/compress v1.18.1 h1:bcSGx7UbpBqMChDtsF28Lw6v/G94LPrrbMbdC3JH2co=
-github.com/klauspost/compress v1.18.1/go.mod h1:ZQFFVG+MdnR0P+l6wpXgIL4NTtwiKIdBnrBd8Nrxr+0=
+github.com/klauspost/compress v1.18.2 h1:iiPHWW0YrcFgpBYhsA6D1+fqHssJscY/Tm/y2Uqnapk=
+github.com/klauspost/compress v1.18.2/go.mod h1:R0h/fSBs8DE4ENlcrlib3PsXS61voFxhIs2DeRhCvJ4=
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/pgzip v1.2.6 h1:8RXeL5crjEUFnR2/Sn6GJNWtSQ3Dk8pq4CL3jvdDyjU=
 github.com/klauspost/pgzip v1.2.6/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQKQE9RUs=
@@ -235,10 +235,10 @@ go.opentelemetry.io/otel/trace v1.38.0 h1:Fxk5bKrDZJUH+AMyyIXGcFAPah0oRcT+LuNtJr
 go.opentelemetry.io/otel/trace v1.38.0/go.mod h1:j1P9ivuFsTceSWe1oY+EeW3sc+Pp42sO++GHkg4wwhs=
 go.podman.io/common v0.66.1-0.20251203180715-01833ef7b7f1 h1:eCKkHqA6Vx0jZ2rAMv2ZGbHLH9hVG5hrUTv6IHSdmiQ=
 go.podman.io/common v0.66.1-0.20251203180715-01833ef7b7f1/go.mod h1:GFrzqrbwoH7/v7Cn8VBNijRctxZLE6/xEcq/QdMGbfs=
-go.podman.io/image/v5 v5.38.1-0.20251203180715-01833ef7b7f1 h1:UWOcmTrl/SThhU81kXfwKe4WUPgYdC+3VYuNtzEsBl8=
-go.podman.io/image/v5 v5.38.1-0.20251203180715-01833ef7b7f1/go.mod h1:1hwk51dCUWRcmnRoqabgb3NrOQ1n0rsv8ZntDcl9G8I=
-go.podman.io/storage v1.61.1-0.20251203180715-01833ef7b7f1 h1:GVyozZyP6fAnPPrGH5jr1YEukXB+X6Z9DK7MDL9LhP0=
-go.podman.io/storage v1.61.1-0.20251203180715-01833ef7b7f1/go.mod h1:wjc8i/eBrHqzzV9rDY7waC/TJSUzsbRg3kMiIJYnGcc=
+go.podman.io/image/v5 v5.38.1-0.20251209145320-afd10d86c8a5 h1:ydoO4pr7/hQkJxBDqoQc92Glzlt3Z66o9gul39wJ3SQ=
+go.podman.io/image/v5 v5.38.1-0.20251209145320-afd10d86c8a5/go.mod h1:r0hBt77AwD5hfGm1RaCG0bYnAdTSAmELZ7yV+FtlhRw=
+go.podman.io/storage v1.61.1-0.20251209145320-afd10d86c8a5 h1:QNtB45DWrrh/wN5TxU236qcnzMDotcG4MFVgkMfazTk=
+go.podman.io/storage v1.61.1-0.20251209145320-afd10d86c8a5/go.mod h1:0Sw1WjfSbddrsjwiPIc/PGTp4y+qE96MV1zwVnguTCo=
 go.yaml.in/yaml/v3 v3.0.4 h1:tfq32ie2Jv2UxXFdLJdh3jXuOzWiL1fo0bu/FbuKpbc=
 go.yaml.in/yaml/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
