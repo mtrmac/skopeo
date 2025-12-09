@@ -22,7 +22,7 @@ require (
 	go.podman.io/common v0.66.1-0.20251203180715-01833ef7b7f1
 	go.podman.io/image/v5 v5.38.1-0.20251203180715-01833ef7b7f1
 	go.podman.io/storage v1.61.1-0.20251203180715-01833ef7b7f1
-	golang.org/x/term v0.37.0
+	golang.org/x/term v0.38.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -103,7 +103,7 @@ require (
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.33.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250929231259-57b25ae835d4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
