@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -42,10 +43,11 @@ func TestCopy(t *testing.T) {
 
 type copySuite struct {
 	suite.Suite
-	cluster    *openshiftCluster
-	registry   *testRegistryV2
-	s1Registry *testRegistryV2
-	gpgHome    string
+	cluster     *openshiftCluster
+	registry    *testRegistryV2
+	s1Registry  *testRegistryV2
+	gpgHome     string
+	fingerprint string
 }
 
 var (
@@ -90,6 +92,12 @@ func (s *copySuite) SetupSuite() {
 			[]byte(out), 0o600)
 		require.NoError(t, err)
 	}
+
+	// Get fingerprint for the personal key (used by some tests)
+	lines, err := exec.Command(gpgBinary, "--homedir", s.gpgHome, "--with-colons", "--no-permission-warning", "--fingerprint", "personal@example.com").Output()
+	require.NoError(t, err)
+	s.fingerprint, err = findFingerprint(lines)
+	require.NoError(t, err)
 }
 
 func (s *copySuite) TearDownSuite() {
@@ -1284,4 +1292,88 @@ func (s *skopeoSuite) TestFailureCopySrcWithMirrorAndPrefixUnavailable() {
 func (s *copySuite) TestCopyFailsWhenReferenceIsInvalid() {
 	t := s.T()
 	assertSkopeoFails(t, `.*Invalid image name.*`, "copy", "unknown:transport", "unknown:test")
+}
+
+func (s *copySuite) TestInsecurePolicyAndRequireSignedConflict() {
+	t := s.T()
+	assertSkopeoFails(t, ".*--insecure-policy and --require-signed are mutually exclusive.*",
+		"--insecure-policy", "--require-signed", "inspect", "dir:/nonexistent")
+}
+
+func (s *copySuite) TestRequireSignedAcceptsSignedImage() {
+	t := s.T()
+	mech, err := signature.NewGPGSigningMechanism()
+	require.NoError(t, err)
+	defer mech.Close()
+	if err := mech.SupportsSigning(); err != nil {
+		t.Skipf("Signing not supported: %v", err)
+	}
+
+	srcDir := t.TempDir()
+
+	// get an image to work with
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3",
+		testFQIN64, "dir:"+srcDir)
+
+	// first, sanity-check that without --require-signed, we can copy it since by default, `dir:` is insecureAcceptAnything
+	destDir1 := t.TempDir()
+	assertSkopeoSucceeds(t, "", "copy", "dir:"+srcDir, "dir:"+destDir1)
+
+	// now verify that copying fails with --require-signed
+	destDir2 := t.TempDir()
+	assertSkopeoFails(t, ".*Source image rejected: No signature verification policy found for image.*",
+		"--require-signed", "copy",
+		"dir:"+srcDir, "dir:"+destDir2)
+
+	// sign the image
+	manifestPath := filepath.Join(srcDir, "manifest.json")
+	signaturePath := filepath.Join(srcDir, "signature-1")
+	dockerReference := "localhost/test:latest"
+
+	assertSkopeoSucceeds(t, "", "standalone-sign",
+		"-o", signaturePath,
+		manifestPath, dockerReference, s.fingerprint)
+
+	// sanity-check signature file is there
+	_, err = os.Stat(signaturePath)
+	require.NoError(t, err)
+
+	// create a basic policy that requires signatures
+	policy := map[string]any{
+		"default": []map[string]any{{
+			"type":    "signedBy",
+			"keyType": "GPGKeys",
+			"keyPath": filepath.Join(s.gpgHome, "personal-pubkey.gpg"),
+			"signedIdentity": map[string]any{
+				"type":             "exactRepository",
+				"dockerRepository": dockerReference,
+			},
+		}},
+	}
+	policyJSON, err := json.Marshal(policy)
+	require.NoError(t, err)
+
+	policyFile, err := os.CreateTemp("", "policy-*.json")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.Remove(policyFile.Name()) })
+	_, err = policyFile.Write(policyJSON)
+	require.NoError(t, err)
+	err = policyFile.Close()
+	require.NoError(t, err)
+
+	// now copying with --require-signed should pass
+	destDir3 := t.TempDir()
+	assertSkopeoSucceeds(t, "", "--policy", policyFile.Name(), "--require-signed", "copy",
+		"dir:"+srcDir, "dir:"+destDir3)
+
+	// Delete the signature and sanity-check that copying fails. This doesn't
+	// strictly test --require-signed, but rather the PolicyRequirements logic, but
+	// it makes the test feel complete.
+	err = os.Remove(signaturePath)
+	require.NoError(t, err)
+
+	destDir4 := t.TempDir()
+	assertSkopeoFails(t, ".*Source image rejected: A signature was required, but no signature exists.*",
+		"--policy", policyFile.Name(), "--require-signed", "copy",
+		"dir:"+srcDir, "dir:"+destDir4)
 }
