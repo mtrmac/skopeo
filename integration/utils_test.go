@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"io"
 	"net"
 	"net/netip"
@@ -28,6 +29,17 @@ var skopeoBinary = func() string {
 	}
 	return "skopeo"
 }()
+
+// findFingerprint extracts the GPG key fingerprint from gpg --with-colons output.
+func findFingerprint(lineBytes []byte) (string, error) {
+	for line := range bytes.SplitSeq(lineBytes, []byte{'\n'}) {
+		fields := strings.Split(string(line), ":")
+		if len(fields) >= 10 && fields[0] == "fpr" {
+			return fields[9], nil
+		}
+	}
+	return "", errors.New("No fingerprint found")
+}
 
 const (
 	testFQIN           = "docker://quay.io/libpod/busybox" // tag left off on purpose, some tests need to add a special one

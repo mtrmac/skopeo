@@ -1,12 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -28,16 +25,6 @@ type signingSuite struct {
 }
 
 var _ = suite.SetupAllSuite(&signingSuite{})
-
-func findFingerprint(lineBytes []byte) (string, error) {
-	for line := range bytes.SplitSeq(lineBytes, []byte{'\n'}) {
-		fields := strings.Split(string(line), ":")
-		if len(fields) >= 10 && fields[0] == "fpr" {
-			return fields[9], nil
-		}
-	}
-	return "", errors.New("No fingerprint found")
-}
 
 func (s *signingSuite) SetupSuite() {
 	t := s.T()
