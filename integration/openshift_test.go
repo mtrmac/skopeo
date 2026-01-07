@@ -207,7 +207,7 @@ func (cluster *openshiftCluster) startRegistry(t *testing.T) {
 	cluster.processes = append(cluster.processes, cluster.startRegistryProcess(t, 5006, schema2Config))
 }
 
-// ocLogin runs (oc login) and (oc new-project) on the cluster, or terminates on failure.
+// ocLoginToProject runs (oc login) and (oc new-project) on the cluster, or terminates on failure.
 func (cluster *openshiftCluster) ocLoginToProject(t *testing.T) {
 	t.Logf("oc login")
 	cmd := cluster.clusterCmd(nil, "oc", "login", "--certificate-authority=openshift.local.config/master/ca.crt", "-u", "myuser", "-p", "mypw", "https://localhost:8443")
