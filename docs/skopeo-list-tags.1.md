@@ -43,7 +43,7 @@ Bearer token for accessing the registry.
 
 **--retry-times**
 
-The number of times to retry.
+The number of times to retry. By default, no retries are attempted.
 
 **--retry-delay**
 
