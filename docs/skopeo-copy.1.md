@@ -214,7 +214,7 @@ Precompute digests to ensure layers are not uploaded that already exist on the d
 
 **--retry-times**
 
-The number of times to retry.
+The number of times to retry. By default, no retries are attempted.
 
 **--retry-delay**
 

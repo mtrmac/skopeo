@@ -134,7 +134,7 @@ Only the first line will be read. A passphrase stored in a file is of questionab
 
 **--retry-times**
 
-The number of times to retry.
+The number of times to retry. By default, no retries are attempted.
 
 **--retry-delay**
 
