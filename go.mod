@@ -15,7 +15,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.2-0.20251016170850-26647a49f642
 	github.com/opencontainers/image-tools v1.0.0-rc3
-	github.com/sirupsen/logrus v1.9.4-0.20251023124752-b61f268f75b6
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
