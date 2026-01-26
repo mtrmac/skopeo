@@ -19,9 +19,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/common v0.66.2-0.20260116182338-b2572af76dc7
-	go.podman.io/image/v5 v5.38.1-0.20260116182338-b2572af76dc7
-	go.podman.io/storage v1.61.1-0.20260116182338-b2572af76dc7
+	go.podman.io/common v0.66.2-0.20260123202709-b5801a635dfa
+	go.podman.io/image/v5 v5.38.1-0.20260123202709-b5801a635dfa
+	go.podman.io/storage v1.61.1-0.20260123202709-b5801a635dfa
 	golang.org/x/term v0.39.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -37,7 +37,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
-	github.com/containerd/stargz-snapshotter/estargz v0.18.1 // indirect
+	github.com/containerd/stargz-snapshotter/estargz v0.18.2 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/coreos/go-oidc/v3 v3.16.0 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467 // indirect
