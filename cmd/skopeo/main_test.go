@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,6 +36,7 @@ func TestGlobalOptionsNewSystemContext(t *testing.T) {
 		"--override-arch", "overridden-arch",
 		"--override-os", "overridden-os",
 		"--override-variant", "overridden-variant",
+		"--tls-details", "../../integration/fixtures/tls-details-pqc-only.yaml",
 		"--tmpdir", "/srv",
 		"--registries-conf", "/srv/registries.conf",
 		"--tls-verify=false",
@@ -42,10 +44,14 @@ func TestGlobalOptionsNewSystemContext(t *testing.T) {
 	res, err = opts.newSystemContext()
 	require.NoError(t, err)
 	assert.Equal(t, &types.SystemContext{
-		RegistriesDirPath:           "/srv/registries.d",
-		ArchitectureChoice:          "overridden-arch",
-		OSChoice:                    "overridden-os",
-		VariantChoice:               "overridden-variant",
+		RegistriesDirPath:  "/srv/registries.d",
+		ArchitectureChoice: "overridden-arch",
+		OSChoice:           "overridden-os",
+		VariantChoice:      "overridden-variant",
+		BaseTLSConfig: &tls.Config{
+			MinVersion:       tls.VersionTLS13,
+			CurvePreferences: []tls.CurveID{tls.X25519MLKEM768},
+		},
 		BigFilesTemporaryDir:        "/srv",
 		SystemRegistriesConfPath:    "/srv/registries.conf",
 		DockerInsecureSkipTLSVerify: types.OptionalBoolTrue,
