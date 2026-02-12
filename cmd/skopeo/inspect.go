@@ -207,8 +207,7 @@ func (opts *inspectOptions) run(args []string, stdout io.Writer) (retErr error) 
 			//   This is actually "code":"NOT_FOUND", and the parser doesn’t preserve that.
 			//   So, also check the error text.
 			if ok := errors.As(err, &ec); ok && ec.ErrorCode() == errcode.ErrorCodeUnknown {
-				var e errcode.Error
-				if ok := errors.As(err, &e); ok && e.Code == errcode.ErrorCodeUnknown && e.Message == "404 page not found" {
+				if e, ok := errors.AsType[errcode.Error](err); ok && e.Code == errcode.ErrorCodeUnknown && e.Message == "404 page not found" {
 					fatalFailure = false
 				}
 			}
