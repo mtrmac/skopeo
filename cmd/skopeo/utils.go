@@ -67,8 +67,7 @@ func noteCloseFailure(err error, description string, closeErr error) error {
 func commandAction(handler func(args []string, stdout io.Writer) error) func(cmd *cobra.Command, args []string) error {
 	return func(c *cobra.Command, args []string) error {
 		err := handler(args, c.OutOrStdout())
-		var shouldDisplayUsage errorShouldDisplayUsage
-		if errors.As(err, &shouldDisplayUsage) {
+		if _, ok := errors.AsType[errorShouldDisplayUsage](err); ok {
 			c.SetOut(c.ErrOrStderr()) // This mutates c, but we are failing anyway.
 			_ = c.Help()              // Even if this failed, we prefer to report the original error
 		}
@@ -564,12 +563,17 @@ func promptForPassphrase(privateKeyFile string, stdin, stdout *os.File) (string,
 // authentication error, an I/O error etc.)
 // TODO drive this into containers/image properly
 func isNotFoundImageError(err error) bool {
-	var layoutImageNotFoundError ocilayout.ImageNotFoundError
-	var archiveImageNotFoundError ociarchive.ImageNotFoundError
-	return isDockerManifestUnknownError(err) ||
-		errors.Is(err, storage.ErrNoSuchImage) ||
-		errors.As(err, &layoutImageNotFoundError) ||
-		errors.As(err, &archiveImageNotFoundError)
+	if isDockerManifestUnknownError(err) ||
+		errors.Is(err, storage.ErrNoSuchImage) {
+		return true
+	}
+	if _, ok := errors.AsType[ocilayout.ImageNotFoundError](err); ok {
+		return true
+	}
+	if _, ok := errors.AsType[ociarchive.ImageNotFoundError](err); ok {
+		return true
+	}
+	return false
 }
 
 // isDockerManifestUnknownError is a copy of code from containers/image,
