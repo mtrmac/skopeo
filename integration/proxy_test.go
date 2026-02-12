@@ -214,9 +214,7 @@ func (p *proxy) callGetRawBlob(args []any) (rval any, buf []byte, err error) {
 	var wg sync.WaitGroup
 	fetchchan := make(chan byteFetch, 1)
 	errchan := make(chan proxyError, 1)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		defer close(fetchchan)
 		defer fd.datafd.Close()
 		buf, err := io.ReadAll(fd.datafd)
@@ -224,10 +222,8 @@ func (p *proxy) callGetRawBlob(args []any) (rval any, buf []byte, err error) {
 			content: buf,
 			err:     err,
 		}
-	}()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		defer fd.errfd.Close()
 		defer close(errchan)
 		buf, err := io.ReadAll(fd.errfd)
@@ -248,7 +244,7 @@ func (p *proxy) callGetRawBlob(args []any) (rval any, buf []byte, err error) {
 			panic(unmarshalErr)
 		}
 		errchan <- proxyErr
-	}()
+	})
 	wg.Wait()
 
 	errMsg := <-errchan
@@ -388,7 +384,7 @@ func runTestMetadataAPIs(p *proxy, img string) error {
 	if err != nil {
 		return err
 	}
-	var layerInfoBytesData []interface{}
+	var layerInfoBytesData []any
 	err = json.Unmarshal(layerInfoBytes, &layerInfoBytesData)
 	if err != nil {
 		return err
