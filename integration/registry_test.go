@@ -17,6 +17,14 @@ const (
 	binaryV2Schema1 = "registry-v2-schema1"
 )
 
+type registryVersion int
+
+const (
+	registryVersionInvalid registryVersion = iota
+	registryVersionModern
+	registryVersionSchema1Only
+)
+
 type testRegistryV2 struct {
 	cmd      *exec.Cmd
 	url      string
@@ -25,8 +33,8 @@ type testRegistryV2 struct {
 	email    string
 }
 
-func setupRegistryV2At(t *testing.T, url string, auth, schema1 bool) *testRegistryV2 {
-	reg, err := newTestRegistryV2At(t, url, auth, schema1)
+func setupRegistryV2At(t *testing.T, url string, auth bool, version registryVersion) *testRegistryV2 {
+	reg, err := newTestRegistryV2At(t, url, auth, version)
 	require.NoError(t, err)
 
 	// Wait for registry to be ready to serve requests.
@@ -43,7 +51,7 @@ func setupRegistryV2At(t *testing.T, url string, auth, schema1 bool) *testRegist
 	return reg
 }
 
-func newTestRegistryV2At(t *testing.T, url string, auth, schema1 bool) (*testRegistryV2, error) {
+func newTestRegistryV2At(t *testing.T, url string, auth bool, version registryVersion) (*testRegistryV2, error) {
 	tmp := t.TempDir()
 	template := `version: 0.1
 loglevel: debug
@@ -89,10 +97,13 @@ compatibility:
 	}
 
 	var cmd *exec.Cmd
-	if schema1 {
-		cmd = exec.Command(binaryV2Schema1, confPath)
-	} else {
+	switch version {
+	case registryVersionModern:
 		cmd = exec.Command(binaryV2, "serve", confPath)
+	case registryVersionSchema1Only:
+		cmd = exec.Command(binaryV2Schema1, confPath)
+	default:
+		return nil, fmt.Errorf("invalid registry version: %v", version)
 	}
 
 	consumeAndLogOutputs(t, fmt.Sprintf("registry-%s", url), cmd)

@@ -76,8 +76,8 @@ func (s *copySuite) SetupSuite() {
 	}
 
 	// FIXME: Set up TLS for the docker registry port instead of using "--tls-verify=false" all over the place.
-	s.registry = setupRegistryV2At(t, v2DockerRegistryURL, false, false)
-	s.s1Registry = setupRegistryV2At(t, v2s1DockerRegistryURL, false, true)
+	s.registry = setupRegistryV2At(t, v2DockerRegistryURL, false, registryVersionModern)
+	s.s1Registry = setupRegistryV2At(t, v2s1DockerRegistryURL, false, registryVersionSchema1Only)
 
 	s.gpgHome = t.TempDir()
 	t.Setenv("GNUPGHOME", s.gpgHome)
