@@ -30,11 +30,12 @@ import (
 )
 
 const (
-	v2DockerRegistryURL   = "localhost:5555" // Update also policy.json
-	v2s1DockerRegistryURL = "localhost:5556"
-	knownWindowsOnlyImage = "docker://mcr.microsoft.com/windows/nanoserver:1909"
-	knownListImageRepo    = "docker://registry.fedoraproject.org/fedora-minimal"
-	knownListImage        = knownListImageRepo + ":38"
+	v2DockerRegistryURL            = "localhost:5555" // Update also policy.json
+	v2s1OnlyDockerRegistryURL      = "localhost:5556"
+	v2s1SupportedDockerRegistryURL = "localhost:5557"
+	knownWindowsOnlyImage          = "docker://mcr.microsoft.com/windows/nanoserver:1909"
+	knownListImageRepo             = "docker://registry.fedoraproject.org/fedora-minimal"
+	knownListImage                 = knownListImageRepo + ":38"
 )
 
 func TestCopy(t *testing.T) {
@@ -43,11 +44,12 @@ func TestCopy(t *testing.T) {
 
 type copySuite struct {
 	suite.Suite
-	cluster     *openshiftCluster
-	registry    *testRegistryV2
-	s1Registry  *testRegistryV2
-	gpgHome     string
-	fingerprint string
+	cluster             *openshiftCluster
+	registry            *testRegistryV2
+	s1OnlyRegistry      *testRegistryV2
+	s1SupportedRegistry *testRegistryV2
+	gpgHome             string
+	fingerprint         string
 }
 
 var (
@@ -77,7 +79,8 @@ func (s *copySuite) SetupSuite() {
 
 	// FIXME: Set up TLS for the docker registry port instead of using "--tls-verify=false" all over the place.
 	s.registry = setupRegistryV2At(t, v2DockerRegistryURL, false, registryVersionModern)
-	s.s1Registry = setupRegistryV2At(t, v2s1DockerRegistryURL, false, registryVersionSchema1Only)
+	s.s1OnlyRegistry = setupRegistryV2At(t, v2s1OnlyDockerRegistryURL, false, registryVersionSchema1Only)
+	s.s1SupportedRegistry = setupRegistryV2At(t, v2s1SupportedDockerRegistryURL, false, registryVersionSchema1Supported)
 
 	s.gpgHome = t.TempDir()
 	t.Setenv("GNUPGHOME", s.gpgHome)
@@ -105,8 +108,11 @@ func (s *copySuite) TearDownSuite() {
 	if s.registry != nil {
 		s.registry.tearDown()
 	}
-	if s.s1Registry != nil {
-		s.s1Registry.tearDown()
+	if s.s1OnlyRegistry != nil {
+		s.s1OnlyRegistry.tearDown()
+	}
+	if s.s1SupportedRegistry != nil {
+		s.s1SupportedRegistry.tearDown()
 	}
 	if s.cluster != nil {
 		s.cluster.tearDown(t)
@@ -903,7 +909,7 @@ func (s *copySuite) TestCopyCompression() {
 	topDir := t.TempDir()
 
 	for i, c := range []struct{ fixture, remote string }{
-		{"uncompressed-image-s1", "docker://" + v2DockerRegistryURL + "/compression/compression:s1"},
+		{"uncompressed-image-s1", "docker://" + v2s1SupportedDockerRegistryURL + "/compression/compression:s1"},
 		{"uncompressed-image-s2", "docker://" + v2DockerRegistryURL + "/compression/compression:s2"},
 		{"uncompressed-image-s1", "atomic:localhost:5000/myns/compression:s1"},
 		{"uncompressed-image-s2", "atomic:localhost:5000/myns/compression:s2"},
@@ -1183,7 +1189,7 @@ func (s *copySuite) TestCopySchemaConversion() {
 	// Test conversion / schema autodetection both for the OpenShift embedded registry…
 	s.testCopySchemaConversionRegistries(t, "docker://localhost:5005/myns/schema1", "docker://localhost:5006/myns/schema2")
 	// … and for various docker/distribution registry versions.
-	s.testCopySchemaConversionRegistries(t, "docker://"+v2s1DockerRegistryURL+"/schema1", "docker://"+v2DockerRegistryURL+"/schema2")
+	s.testCopySchemaConversionRegistries(t, "docker://"+v2s1OnlyDockerRegistryURL+"/schema1", "docker://"+v2s1SupportedDockerRegistryURL+"/schema2")
 }
 
 func (s *copySuite) TestCopyManifestConversion() {

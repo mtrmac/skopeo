@@ -13,16 +13,18 @@ import (
 )
 
 const (
-	binaryV2        = "registry"
-	binaryV2Schema1 = "registry-v2-schema1"
+	binaryV2                 = "registry"
+	binaryV2Schema1Only      = "registry-v2-schema1-only"
+	binaryV2Schema1Supported = "registry-v2-schema1-supported"
 )
 
 type registryVersion int
 
 const (
-	registryVersionInvalid registryVersion = iota
-	registryVersionModern
-	registryVersionSchema1Only
+	registryVersionInvalid          registryVersion = iota
+	registryVersionModern                           // Whatever comes from a packaged docker-distribution; as of 2026-03 supports schema2, not schema1.
+	registryVersionSchema1Only                      // Supports only schema1
+	registryVersionSchema1Supported                 // Supports both schema1 and schema2
 )
 
 type testRegistryV2 struct {
@@ -101,7 +103,9 @@ compatibility:
 	case registryVersionModern:
 		cmd = exec.Command(binaryV2, "serve", confPath)
 	case registryVersionSchema1Only:
-		cmd = exec.Command(binaryV2Schema1, confPath)
+		cmd = exec.Command(binaryV2Schema1Only, confPath)
+	case registryVersionSchema1Supported:
+		cmd = exec.Command(binaryV2Schema1Supported, "serve", confPath)
 	default:
 		return nil, fmt.Errorf("invalid registry version: %v", version)
 	}
