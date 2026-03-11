@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -75,15 +76,13 @@ func TestStandaloneSign(t *testing.T) {
 	assertTestFailed(t, out, err, "/dev/full")
 
 	// Success
-	sigOutput, err := os.CreateTemp("", "sig")
-	require.NoError(t, err)
-	defer os.Remove(sigOutput.Name())
-	out, err = runSkopeo("standalone-sign", "-o", sigOutput.Name(),
+	sigOutput := filepath.Join(t.TempDir(), "sig")
+	out, err = runSkopeo("standalone-sign", "-o", sigOutput,
 		manifestPath, dockerReference, fixturesTestKeyFingerprint)
 	require.NoError(t, err)
 	assert.Empty(t, out)
 
-	sig, err := os.ReadFile(sigOutput.Name())
+	sig, err := os.ReadFile(sigOutput)
 	require.NoError(t, err)
 	manifest, err := os.ReadFile(manifestPath)
 	require.NoError(t, err)

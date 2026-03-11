@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -54,13 +54,11 @@ func (s *signingSuite) TestSignVerifySmoke() {
 	manifestPath := "fixtures/image.manifest.json"
 	dockerReference := "testing/smoketest"
 
-	sigOutput, err := os.CreateTemp("", "sig")
-	require.NoError(t, err)
-	defer os.Remove(sigOutput.Name())
-	assertSkopeoSucceeds(t, "^$", "standalone-sign", "-o", sigOutput.Name(),
+	sigOutput := filepath.Join(t.TempDir(), "sig")
+	assertSkopeoSucceeds(t, "^$", "standalone-sign", "-o", sigOutput,
 		manifestPath, dockerReference, s.fingerprint)
 
 	expected := fmt.Sprintf("^Signature verified using fingerprint %s, digest %s\n$", s.fingerprint, TestImageManifestDigest)
 	assertSkopeoSucceeds(t, expected, "standalone-verify", manifestPath,
-		dockerReference, s.fingerprint, sigOutput.Name())
+		dockerReference, s.fingerprint, sigOutput)
 }
