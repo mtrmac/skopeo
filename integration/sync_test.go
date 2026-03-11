@@ -54,12 +54,9 @@ var (
 func (s *syncSuite) SetupSuite() {
 	t := s.T()
 
-	const registryAuth = false
-	const registrySchema1 = false
-
 	if os.Getenv("SKOPEO_LOCAL_TESTS") == "1" {
 		t.Log("Running tests without a container")
-		fmt.Printf("NOTE: tests requires a V2 registry at url=%s, with auth=%t, schema1=%t \n", v2DockerRegistryURL, registryAuth, registrySchema1)
+		fmt.Printf("NOTE: tests requires a V2 registry at url=%s\n", v2DockerRegistryURL)
 		return
 	}
 
@@ -82,7 +79,7 @@ func (s *syncSuite) SetupSuite() {
 	}
 
 	// FIXME: Set up TLS for the docker registry port instead of using "--tls-verify=false" all over the place.
-	s.registry = setupRegistryV2At(t, v2DockerRegistryURL, registryAuth, registrySchema1)
+	s.registry = setupRegistryV2At(t, v2DockerRegistryURL, false, registryVersionModern)
 
 	gpgHome := t.TempDir()
 	t.Setenv("GNUPGHOME", gpgHome)

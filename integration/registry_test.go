@@ -13,8 +13,18 @@ import (
 )
 
 const (
-	binaryV2        = "registry"
-	binaryV2Schema1 = "registry-v2-schema1"
+	binaryV2                 = "registry"
+	binaryV2Schema1Only      = "registry-v2-schema1-only"
+	binaryV2Schema1Supported = "registry-v2-schema1-supported"
+)
+
+type registryVersion int
+
+const (
+	registryVersionInvalid          registryVersion = iota
+	registryVersionModern                           // Whatever comes from a packaged docker-distribution; as of 2026-03 supports schema2, not schema1.
+	registryVersionSchema1Only                      // Supports only schema1
+	registryVersionSchema1Supported                 // Supports both schema1 and schema2
 )
 
 type testRegistryV2 struct {
@@ -25,8 +35,8 @@ type testRegistryV2 struct {
 	email    string
 }
 
-func setupRegistryV2At(t *testing.T, url string, auth, schema1 bool) *testRegistryV2 {
-	reg, err := newTestRegistryV2At(t, url, auth, schema1)
+func setupRegistryV2At(t *testing.T, url string, auth bool, version registryVersion) *testRegistryV2 {
+	reg, err := newTestRegistryV2At(t, url, auth, version)
 	require.NoError(t, err)
 
 	// Wait for registry to be ready to serve requests.
@@ -43,7 +53,7 @@ func setupRegistryV2At(t *testing.T, url string, auth, schema1 bool) *testRegist
 	return reg
 }
 
-func newTestRegistryV2At(t *testing.T, url string, auth, schema1 bool) (*testRegistryV2, error) {
+func newTestRegistryV2At(t *testing.T, url string, auth bool, version registryVersion) (*testRegistryV2, error) {
 	tmp := t.TempDir()
 	template := `version: 0.1
 loglevel: debug
@@ -89,10 +99,15 @@ compatibility:
 	}
 
 	var cmd *exec.Cmd
-	if schema1 {
-		cmd = exec.Command(binaryV2Schema1, confPath)
-	} else {
+	switch version {
+	case registryVersionModern:
 		cmd = exec.Command(binaryV2, "serve", confPath)
+	case registryVersionSchema1Only:
+		cmd = exec.Command(binaryV2Schema1Only, confPath)
+	case registryVersionSchema1Supported:
+		cmd = exec.Command(binaryV2Schema1Supported, "serve", confPath)
+	default:
+		return nil, fmt.Errorf("invalid registry version: %v", version)
 	}
 
 	consumeAndLogOutputs(t, fmt.Sprintf("registry-%s", url), cmd)

@@ -35,8 +35,8 @@ func (s *skopeoSuite) SetupSuite() {
 	t := s.T()
 	_, err := exec.LookPath(skopeoBinary)
 	require.NoError(t, err)
-	s.regV2 = setupRegistryV2At(t, privateRegistryURL0, false, false)
-	s.regV2WithAuth = setupRegistryV2At(t, privateRegistryURL1, true, false)
+	s.regV2 = setupRegistryV2At(t, privateRegistryURL0, false, registryVersionModern)
+	s.regV2WithAuth = setupRegistryV2At(t, privateRegistryURL1, true, registryVersionModern)
 }
 
 func (s *skopeoSuite) TearDownSuite() {
