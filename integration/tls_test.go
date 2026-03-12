@@ -243,7 +243,7 @@ func (s *tlsSuite) TestOpenShift() {
 	t.Setenv("KUBECONFIG", configPath)
 
 	for _, e := range s.expected {
-		err := os.WriteFile(configPath, []byte(fmt.Sprintf(
+		err := os.WriteFile(configPath, fmt.Appendf(nil,
 			`apiVersion: v1
 clusters:
 - cluster:
@@ -257,7 +257,7 @@ contexts:
   name: our-context
 current-context: our-context
 kind: Config
-`, e.server.certPath, e.server.server.URL)), 0o644)
+`, e.server.certPath, e.server.server.URL), 0o644)
 		require.NoError(t, err)
 		// The atomic: image access starts with resolving the tag in a k8s API (and that will always fail, one way or another),
 		// so we never actually contact registry.example.
