@@ -195,8 +195,7 @@ func (opts *copyOptions) run(args []string, stdout io.Writer) (retErr error) {
 
 	if len(opts.encryptionKeys) > 0 {
 		// encryption
-		p := opts.encryptLayer
-		encLayers = &p
+		encLayers = new(opts.encryptLayer)
 		encryptionKeys := opts.encryptionKeys
 		ecc, err := enchelpers.CreateCryptoConfig(encryptionKeys, []string{})
 		if err != nil {
