@@ -1359,17 +1359,13 @@ func (s *copySuite) TestRequireSignedAcceptsSignedImage() {
 	policyJSON, err := json.Marshal(policy)
 	require.NoError(t, err)
 
-	policyFile, err := os.CreateTemp("", "policy-*.json")
-	require.NoError(t, err)
-	t.Cleanup(func() { os.Remove(policyFile.Name()) })
-	_, err = policyFile.Write(policyJSON)
-	require.NoError(t, err)
-	err = policyFile.Close()
+	policyFile := filepath.Join(t.TempDir(), "policy.json")
+	err = os.WriteFile(policyFile, policyJSON, 0o600)
 	require.NoError(t, err)
 
 	// now copying with --require-signed should pass
 	destDir3 := t.TempDir()
-	assertSkopeoSucceeds(t, "", "--policy", policyFile.Name(), "--require-signed", "copy",
+	assertSkopeoSucceeds(t, "", "--policy", policyFile, "--require-signed", "copy",
 		"dir:"+srcDir, "dir:"+destDir3)
 
 	// Delete the signature and sanity-check that copying fails. This doesn't
@@ -1380,6 +1376,6 @@ func (s *copySuite) TestRequireSignedAcceptsSignedImage() {
 
 	destDir4 := t.TempDir()
 	assertSkopeoFails(t, ".*Source image rejected: A signature was required, but no signature exists.*",
-		"--policy", policyFile.Name(), "--require-signed", "copy",
+		"--policy", policyFile, "--require-signed", "copy",
 		"dir:"+srcDir, "dir:"+destDir4)
 }

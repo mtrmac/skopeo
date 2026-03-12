@@ -674,8 +674,7 @@ func (h *proxyHandler) GetRawBlob(args []any) (replyBuf, error) {
 				// Should never happen
 				panic(err)
 			}
-			_, writeErr := errpipeW.Write(buf)
-			if writeErr != nil && !errors.Is(err, syscall.EPIPE) {
+			if _, err := errpipeW.Write(buf); err != nil && !errors.Is(err, syscall.EPIPE) {
 				logrus.Debugf("Writing to client: %v", err)
 			}
 		}

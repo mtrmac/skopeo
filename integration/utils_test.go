@@ -206,14 +206,9 @@ func fileFromFixture(t *testing.T, inputPath string, edits map[string]string) st
 		contents = updated
 	}
 
-	file, err := os.CreateTemp("", "policy.json")
-	require.NoError(t, err)
-	path := file.Name()
-	t.Cleanup(func() { os.Remove(path) })
+	path := filepath.Join(t.TempDir(), "policy.json")
 
-	_, err = file.Write(contents)
-	require.NoError(t, err)
-	err = file.Close()
+	err = os.WriteFile(path, contents, 0o600)
 	require.NoError(t, err)
 	return path
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -368,10 +369,8 @@ func fakeSharedCopyOptions(t *testing.T, cmdFlags []string) *sharedCopyOptions {
 func TestSharedCopyOptionsCopyOptions(t *testing.T) {
 	someStdout := bytes.Buffer{}
 
-	passphraseFile, err := os.CreateTemp("", "passphrase") // Eventually we could refer to a passphrase fixture instead
-	require.NoError(t, err)
-	defer os.Remove(passphraseFile.Name())
-	_, err = passphraseFile.WriteString("test-passphrase")
+	passphraseFile := filepath.Join(t.TempDir(), "passphrase") // Eventually we could refer to a passphrase fixture instead
+	err := os.WriteFile(passphraseFile, []byte("test-passphrase"), 0o600)
 	require.NoError(t, err)
 
 	type tc struct {
@@ -408,7 +407,7 @@ func TestSharedCopyOptionsCopyOptions(t *testing.T) {
 		{ // --sign-passphrase-file + --sign-by work
 			options: []string{
 				"--sign-by", "gpgFingerprint",
-				"--sign-passphrase-file", passphraseFile.Name(),
+				"--sign-passphrase-file", passphraseFile,
 			},
 			expected: copy.Options{
 				SignBy:                           "gpgFingerprint",
@@ -420,7 +419,7 @@ func TestSharedCopyOptionsCopyOptions(t *testing.T) {
 		{ // --sign-passphrase-file + --sign-by-sigstore-private-key work
 			options: []string{
 				"--sign-by-sigstore-private-key", "/some/key/path.private",
-				"--sign-passphrase-file", passphraseFile.Name(),
+				"--sign-passphrase-file", passphraseFile,
 			},
 			expected: copy.Options{
 				SignPassphrase:                   "test-passphrase",
@@ -447,7 +446,7 @@ func TestSharedCopyOptionsCopyOptions(t *testing.T) {
 		c = append(c, tc{
 			options: []string{
 				"--sign-by-sq-fingerprint", "sqFingerprint",
-				"--sign-passphrase-file", passphraseFile.Name(),
+				"--sign-passphrase-file", passphraseFile,
 			},
 			expected: copy.Options{
 				SignPassphrase:                   "test-passphrase",
@@ -473,9 +472,9 @@ func TestSharedCopyOptionsCopyOptions(t *testing.T) {
 		{"--format", "invalid"}, // Invalid --format
 		// More --sign-by-sigstore-private-key, --sign-by-sigstore failure cases should be tested here.
 		// --sign-passphrase-file + more than one key option
-		{"--sign-by", "gpgFingerprint", "--sign-by-sq-fingerprint", "sqFingerprint", "--sign-passphrase-file", passphraseFile.Name()},
-		{"--sign-by", "gpgFingerprint", "--sign-by-sigstore-private-key", "sigstorePrivateKey", "--sign-passphrase-file", passphraseFile.Name()},
-		{"--sign-by-sq-fingerprint", "sqFingerprint", "--sign-by-sigstore-private-key", "sigstorePrivateKey", "--sign-passphrase-file", passphraseFile.Name()},
+		{"--sign-by", "gpgFingerprint", "--sign-by-sq-fingerprint", "sqFingerprint", "--sign-passphrase-file", passphraseFile},
+		{"--sign-by", "gpgFingerprint", "--sign-by-sigstore-private-key", "sigstorePrivateKey", "--sign-passphrase-file", passphraseFile},
+		{"--sign-by-sq-fingerprint", "sqFingerprint", "--sign-by-sigstore-private-key", "sigstorePrivateKey", "--sign-passphrase-file", passphraseFile},
 		{"--sign-by", "gpgFingerprint", "--sign-passphrase-file", "/dev/null/this/does/not/exist"}, // --sign-passphrase-file not found
 		{"--sign-by-sigstore", "/dev/null/this/does/not/exist"},                                    // --sign-by-sigstore file not found
 	} {
