@@ -1,7 +1,7 @@
 module github.com/containers/skopeo
 
 // Minimum required golang version
-go 1.25.0
+go 1.25.6
 
 // Warning: Ensure the "go" and "toolchain" versions match exactly to prevent unwanted auto-updates
 
@@ -17,9 +17,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/common v0.67.1-0.20260319154331-44a8de38c431
-	go.podman.io/image/v5 v5.39.2-0.20260313202710-ddaabae34a06
-	go.podman.io/storage v1.62.1-0.20260316152041-ebc34488c338
+	go.podman.io/common v0.67.1-0.20260324131108-94ad0236ccd0
+	go.podman.io/image/v5 v5.39.2-0.20260324131108-94ad0236ccd0
+	go.podman.io/storage v1.62.1-0.20260324131108-94ad0236ccd0
 	golang.org/x/term v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -51,7 +51,7 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/go-containerregistry v0.20.7 // indirect
+	github.com/google/go-containerregistry v0.21.1 // indirect
 	github.com/google/go-intervals v0.0.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
@@ -60,10 +60,10 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.4 // indirect
+	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/mattn/go-runewidth v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.34 // indirect
+	github.com/mattn/go-sqlite3 v1.14.37 // indirect
 	github.com/miekg/pkcs11 v1.1.1 // indirect
 	github.com/mistifyio/go-zfs/v4 v4.0.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
@@ -87,7 +87,7 @@ require (
 	github.com/sigstore/sigstore v1.10.4 // indirect
 	github.com/smallstep/pkcs7 v0.1.1 // indirect
 	github.com/stefanberger/go-pkcs11uri v0.0.0-20230803200340-78284954bff6 // indirect
-	github.com/sylabs/sif/v2 v2.22.0 // indirect
+	github.com/sylabs/sif/v2 v2.24.0 // indirect
 	github.com/tchap/go-patricia/v2 v2.3.3 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
 	github.com/vbatts/tar-split v0.12.2 // indirect
