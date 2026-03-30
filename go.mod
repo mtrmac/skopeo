@@ -17,9 +17,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/common v0.67.1-0.20260324131108-94ad0236ccd0
-	go.podman.io/image/v5 v5.39.2-0.20260324131108-94ad0236ccd0
-	go.podman.io/storage v1.62.1-0.20260324131108-94ad0236ccd0
+	go.podman.io/common v0.67.1-0.20260325203629-8af78737e8bb
+	go.podman.io/image/v5 v5.39.2-0.20260325203629-8af78737e8bb
+	go.podman.io/storage v1.62.1-0.20260325203629-8af78737e8bb
 	golang.org/x/term v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
 )
