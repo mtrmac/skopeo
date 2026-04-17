@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/containers/skopeo/version"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	commonFlag "go.podman.io/common/pkg/flag"
 	"go.podman.io/image/v5/pkg/cli/basetls/tlsdetails"
 	"go.podman.io/image/v5/signature"
 	"go.podman.io/image/v5/types"
+	"go.podman.io/skopeo/version"
 	"go.podman.io/storage/pkg/reexec"
 )
 

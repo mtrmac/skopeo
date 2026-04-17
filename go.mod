@@ -1,4 +1,4 @@
-module github.com/containers/skopeo
+module go.podman.io/skopeo
 
 // Minimum required golang version
 go 1.25.6
