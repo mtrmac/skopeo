@@ -29,7 +29,7 @@ in_get_ci_vm() {
 if [[ "$1" == "--config" ]]; then
     in_get_ci_vm "$1"
     cat <<EOF
-DESTDIR="/var/tmp/go/src/github.com/containers/skopeo"
+DESTDIR="/var/tmp/go/src/go.podman.io/skopeo"
 UPSTREAM_REPO="https://github.com/containers/skopeo.git"
 GCLOUD_PROJECT="skopeo"
 GCLOUD_IMGPROJECT="libpod-218412"

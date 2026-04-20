@@ -7,7 +7,6 @@ import (
 	"io"
 	"strings"
 
-	"github.com/containers/skopeo/cmd/skopeo/inspect"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/opencontainers/go-digest"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -20,6 +19,7 @@ import (
 	"go.podman.io/image/v5/manifest"
 	"go.podman.io/image/v5/transports"
 	"go.podman.io/image/v5/types"
+	"go.podman.io/skopeo/cmd/skopeo/inspect"
 )
 
 type inspectOptions struct {

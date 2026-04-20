@@ -80,7 +80,7 @@ INTERACTIVE := $(shell [ -t 0 ] && echo 1 || echo 0)
 ifeq ($(INTERACTIVE), 1)
 	CONTAINER_CMD += -t
 endif
-CONTAINER_GOSRC = /src/github.com/containers/skopeo
+CONTAINER_GOSRC = /src/go.podman.io/skopeo
 CONTAINER_RUN ?= $(CONTAINER_CMD) --security-opt label=disable -v $(CURDIR):$(CONTAINER_GOSRC) -w $(CONTAINER_GOSRC) $(SKOPEO_CIDEV_CONTAINER_FQIN)
 
 EXTRA_LDFLAGS ?=
@@ -263,7 +263,7 @@ validate-docs: bin/skopeo
 	hack/xref-helpmsgs-manpages
 
 test-unit-local:
-	$(GO) test $(SKOPEO_LDFLAGS) -tags "$(BUILDTAGS)" $$($(GO) list -tags "$(BUILDTAGS)" -e ./... | grep -v '^github\.com/containers/skopeo/\(integration\|vendor/.*\)$$')
+	$(GO) test $(SKOPEO_LDFLAGS) -tags "$(BUILDTAGS)" $$($(GO) list -tags "$(BUILDTAGS)" -e ./... | grep -v '^go\.podman\.io/skopeo/\(integration\|vendor/.*\)$$')
 
 vendor:
 	$(GO) mod tidy

@@ -183,8 +183,8 @@ sudo pacman -S base-devel gpgme btrfs-progs
 Make sure to clone this repository in your `GOPATH` - otherwise compilation fails.
 
 ```bash
-git clone https://github.com/containers/skopeo $GOPATH/src/github.com/containers/skopeo
-cd $GOPATH/src/github.com/containers/skopeo && make bin/skopeo
+git clone https://github.com/containers/skopeo $GOPATH/src/go.podman.io/skopeo
+cd $GOPATH/src/go.podman.io/skopeo && make bin/skopeo
 ```
 
 By default the `make` command (make all) will build bin/skopeo and the documentation locally.
