@@ -17,9 +17,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/common v0.67.2-0.20260414164552-129af756cb52
-	go.podman.io/image/v5 v5.39.3-0.20260414164552-129af756cb52
-	go.podman.io/storage v1.62.1-0.20260414164552-129af756cb52
+	go.podman.io/common v0.67.2-0.20260420103546-618304d6f83d
+	go.podman.io/image/v5 v5.39.3-0.20260420103546-618304d6f83d
+	go.podman.io/storage v1.62.1-0.20260420103546-618304d6f83d
 	golang.org/x/term v0.42.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -43,7 +43,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/docker-credential-helpers v0.9.5 // indirect
-	github.com/docker/go-connections v0.6.0 // indirect
+	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect

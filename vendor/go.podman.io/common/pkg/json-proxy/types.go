@@ -98,9 +98,9 @@ type activePipe struct {
 // openImage is an opened image reference.
 type openImage struct {
 	// id is an opaque integer handle.
-	id        uint64
-	src       types.ImageSource
-	cachedimg types.Image
+	id  uint64
+	src types.ImageSource
+	img types.Image
 }
 
 // convertedLayerInfo is the reduced form of the OCI type BlobInfo
