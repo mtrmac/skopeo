@@ -80,7 +80,7 @@ INTERACTIVE := $(shell [ -t 0 ] && echo 1 || echo 0)
 ifeq ($(INTERACTIVE), 1)
 	CONTAINER_CMD += -t
 endif
-CONTAINER_GOSRC = /src/github.com/containers/skopeo
+CONTAINER_GOSRC = /src/go.podman.io/skopeo
 CONTAINER_RUN ?= $(CONTAINER_CMD) --security-opt label=disable -v $(CURDIR):$(CONTAINER_GOSRC) -w $(CONTAINER_GOSRC) $(SKOPEO_CIDEV_CONTAINER_FQIN)
 
 EXTRA_LDFLAGS ?=

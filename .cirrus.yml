@@ -11,7 +11,7 @@ env:
     GOPATH: &gopath "/var/tmp/go"
     GOBIN: "${GOPATH}/bin"
     GOCACHE: "${GOPATH}/cache"
-    GOSRC: &gosrc "/var/tmp/go/src/github.com/containers/skopeo"
+    GOSRC: &gosrc "/var/tmp/go/src/go.podman.io/skopeo"
     # Required for consistency with containers/image CI
     SKOPEO_PATH: *gosrc
     CIRRUS_WORKING_DIR: *gosrc
