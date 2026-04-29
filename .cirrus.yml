@@ -21,14 +21,8 @@ env:
     SCRIPT_BASE: "./contrib/cirrus"
 
     # Google-cloud VM Images
-    # If you are updating IMAGE_SUFFIX: We are currently using rawhide for
-    # the containers_image_sequoia tests because the rust-podman-sequoia
-    # package is not available in earlier releases; once we update to a future
-    # Fedora release (or if the package is backported), switch back from Rawhide
-    # to the latest Fedora release.
     IMAGE_SUFFIX: "c20260310t170224z-f43f42d14"
     FEDORA_CACHE_IMAGE_NAME: "fedora-${IMAGE_SUFFIX}"
-    RAWHIDE_CACHE_IMAGE_NAME: "rawhide-${IMAGE_SUFFIX}"
 
     # Container FQIN's
     FEDORA_CONTAINER_FQIN: "quay.io/libpod/fedora_podman:${IMAGE_SUFFIX}"
@@ -206,11 +200,10 @@ test_skopeo_task:
           env:
               BUILDTAGS: *withopengpg
               VM_IMAGE_NAME: ${FEDORA_CACHE_IMAGE_NAME}
-        - name: "Skopeo test w/ Sequoia (currently Rawhide)"
+        - name: "Skopeo test w/ Sequoia"
           env:
               BUILDTAGS: 'containers_image_sequoia'
-              # If you are removing the use of rawhide, also remove the VM_IMAGE_NAME condition from runner.sh .
-              VM_IMAGE_NAME: ${RAWHIDE_CACHE_IMAGE_NAME}
+              VM_IMAGE_NAME: ${FEDORA_CACHE_IMAGE_NAME}
     setup_script: >-
         "${GOSRC}/${SCRIPT_BASE}/runner.sh" setup
     vendor_script: >-
@@ -239,7 +232,6 @@ meta_task:
         # Space-separated list of images used by this repository state
         IMGNAMES: |
             ${FEDORA_CACHE_IMAGE_NAME}
-            ${RAWHIDE_CACHE_IMAGE_NAME}
             build-push-${IMAGE_SUFFIX}
         BUILDID: "${CIRRUS_BUILD_ID}"
         REPOREF: "${CIRRUS_REPO_NAME}"
