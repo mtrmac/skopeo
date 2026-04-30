@@ -6,7 +6,7 @@ go 1.25.6
 // Warning: Ensure the "go" and "toolchain" versions match exactly to prevent unwanted auto-updates
 
 require (
-	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/containers/ocicrypt v1.3.0
 	github.com/docker/distribution v2.8.3+incompatible
 	github.com/moby/sys/capability v0.4.0
