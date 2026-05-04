@@ -29,7 +29,7 @@ SEQUOIA_SONAME_DIR =
 # N/B: This value is managed by Renovate, manual changes are
 # possible, as long as they don't disturb the formatting
 # (i.e. DO NOT ADD A 'v' prefix!)
-GOLANGCI_LINT_VERSION := 2.11.4
+GOLANGCI_LINT_VERSION := 2.12.1
 
 ifeq ($(GOBIN),)
 GOBIN := $(GOPATH)/bin
@@ -188,7 +188,7 @@ shell:
 
 tools:
 	if [ ! -x "$(GOBIN)/golangci-lint" ]; then \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v$(GOLANGCI_LINT_VERSION) ; \
+		curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(GOBIN) v$(GOLANGCI_LINT_VERSION) ; \
 	fi
 
 check: validate test-unit test-integration test-system
