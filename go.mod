@@ -17,9 +17,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/common v0.67.2-0.20260504103427-c03a490dd857
-	go.podman.io/image/v5 v5.39.3-0.20260504103427-c03a490dd857
-	go.podman.io/storage v1.62.1-0.20260504103427-c03a490dd857
+	go.podman.io/common v0.67.2-0.20260507172113-abe824d0032c
+	go.podman.io/image/v5 v5.39.3-0.20260507172113-abe824d0032c
+	go.podman.io/storage v1.62.1-0.20260507172113-abe824d0032c
 	golang.org/x/term v0.42.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -90,7 +90,7 @@ require (
 	github.com/sylabs/sif/v2 v2.24.0 // indirect
 	github.com/tchap/go-patricia/v2 v2.3.3 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
-	github.com/vbatts/tar-split v0.12.2 // indirect
+	github.com/vbatts/tar-split v0.12.3 // indirect
 	github.com/vbauerster/mpb/v8 v8.12.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0 // indirect
