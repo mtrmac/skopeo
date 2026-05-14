@@ -78,7 +78,7 @@ See skopeo(1) section "IMAGE NAMES" for the expected format
 	flags.StringSliceVar(&opts.additionalTags, "additional-tag", []string{}, "additional tags (supports docker-archive)")
 	flags.BoolVarP(&opts.quiet, "quiet", "q", false, "Suppress output information when copying images")
 	flags.BoolVarP(&opts.all, "all", "a", false, "Copy all images if SOURCE-IMAGE is a list")
-	flags.Var(commonFlag.NewOptionalStringValue(&opts.multiArch), "multi-arch", `How to handle multi-architecture images (system, all, or index-only)`)
+	flags.Var(commonFlag.NewOptionalStringValue(&opts.multiArch), "multi-arch", `How to handle multi-architecture images (system, all, index-only, or comma-separated platform list like linux/amd64,linux/arm64)`)
 	flags.StringVar(&opts.signIdentity, "sign-identity", "", "Identity of signed image, must be a fully specified docker reference. Defaults to the target docker reference.")
 	flags.StringVar(&opts.digestFile, "digestfile", "", "Write the digest of the pushed image to the specified file")
 	flags.StringSliceVar(&opts.encryptionKeys, "encryption-key", []string{}, "*Experimental* key with the encryption protocol to use needed to encrypt the image (e.g. jwe:/path/to/key.pem)")
@@ -89,23 +89,37 @@ See skopeo(1) section "IMAGE NAMES" for the expected format
 }
 
 // parseMultiArch parses the list processing selection
-// It returns the copy.ImageListSelection to use with image.Copy option
-func parseMultiArch(multiArch string) (copy.ImageListSelection, error) {
+// It returns the copy.ImageListSelection to use with image.Copy option,
+// and optionally a list of platform filters if specific platforms were requested
+func parseMultiArch(multiArch string) (copy.ImageListSelection, []copy.InstancePlatformFilter, error) {
 	switch multiArch {
 	case "system":
-		return copy.CopySystemImage, nil
+		return copy.CopySystemImage, nil, nil
 	case "all":
-		return copy.CopyAllImages, nil
+		return copy.CopyAllImages, nil, nil
 	// There is no CopyNoImages value in copy.ImageListSelection, but because we
 	// don't provide an option to select a set of images to copy, we can use
 	// CopySpecificImages.
 	case "index-only":
-		return copy.CopySpecificImages, nil
-	// We don't expose CopySpecificImages other than index-only above, because
-	// we currently don't provide an option to choose the images to copy. That
-	// could be added in the future.
+		return copy.CopySpecificImages, nil, nil
 	default:
-		return copy.CopySystemImage, fmt.Errorf("unknown multi-arch option %q. Choose one of the supported options: 'system', 'all', or 'index-only'", multiArch)
+		if !strings.Contains(multiArch, "/") {
+			return copy.CopySystemImage, nil, fmt.Errorf("unknown multi-arch option %q. Choose one of the supported options: 'system', 'all', 'index-only', or a comma-separated platform list like 'linux/amd64,linux/arm64'", multiArch)
+		}
+		// Parse comma-separated platform list
+		var platforms []copy.InstancePlatformFilter
+		for platform := range strings.SplitSeq(multiArch, ",") {
+			platform = strings.TrimSpace(platform)
+			parts := strings.Split(platform, "/")
+			if len(parts) != 2 {
+				return copy.CopySystemImage, nil, fmt.Errorf("invalid platform format %q in --multi-arch, expected OS/Architecture (e.g., linux/amd64)", platform)
+			}
+			platforms = append(platforms, copy.InstancePlatformFilter{
+				OS:           parts[0],
+				Architecture: parts[1],
+			})
+		}
+		return copy.CopySpecificImages, platforms, nil
 	}
 }
 
@@ -168,11 +182,12 @@ func (opts *copyOptions) run(args []string, stdout io.Writer) (retErr error) {
 	}
 
 	imageListSelection := copy.CopySystemImage
+	var instancePlatforms []copy.InstancePlatformFilter
 	if opts.multiArch.Present() && opts.all {
 		return fmt.Errorf("Cannot use --all and --multi-arch flags together")
 	}
 	if opts.multiArch.Present() {
-		imageListSelection, err = parseMultiArch(opts.multiArch.Value())
+		imageListSelection, instancePlatforms, err = parseMultiArch(opts.multiArch.Value())
 		if err != nil {
 			return err
 		}
@@ -236,6 +251,7 @@ func (opts *copyOptions) run(args []string, stdout io.Writer) (retErr error) {
 	copyOpts.SourceCtx = sourceCtx
 	copyOpts.DestinationCtx = destinationCtx
 	copyOpts.ImageListSelection = imageListSelection
+	copyOpts.InstancePlatforms = instancePlatforms
 	copyOpts.OciDecryptConfig = decConfig
 	copyOpts.OciEncryptLayers = encLayers
 	copyOpts.OciEncryptConfig = encConfig

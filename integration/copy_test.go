@@ -187,6 +187,23 @@ func (s *copySuite) TestCopyNoneWithManifestList() {
 	assert.Equal(t, "manifest.json\nversion\n", out)
 }
 
+func (s *copySuite) TestCopyWithPlatformList() {
+	t := s.T()
+	dir1 := t.TempDir()
+	assertSkopeoSucceeds(t, "", "copy", "--retry-times", "3", "--multi-arch=linux/amd64,linux/arm64", knownListImage, "dir:"+dir1)
+
+	manifestPath := filepath.Join(dir1, "manifest.json")
+	readManifest, err := os.ReadFile(manifestPath)
+	require.NoError(t, err)
+	mimeType := manifest.GuessMIMEType(readManifest)
+	assert.Equal(t, "application/vnd.docker.distribution.manifest.list.v2+json", mimeType)
+
+	// Verify that we copied exactly 2 platform manifests (manifest list + 2 platforms = 3 manifest files)
+	manifestFiles, err := filepath.Glob(filepath.Join(dir1, "*manifest.json"))
+	require.NoError(t, err)
+	assert.Equal(t, 3, len(manifestFiles), "Expected manifest list + 2 platform manifests")
+}
+
 func (s *copySuite) TestCopyWithManifestListConverge() {
 	t := s.T()
 	oci1 := t.TempDir()

@@ -83,8 +83,11 @@ Options:
 - system: Copy only the image that matches the system architecture
 - all: Copy the full multi-architecture image
 - index-only: Copy only the index
+- _platform-list_: Copy only specific platforms (comma-separated list of OS/Architecture pairs, e.g., `linux/amd64,linux/arm64`)
 
-The index-only option usually fails unless the referenced per-architecture images are already present in the destination, or the target registry supports sparse indexes.
+The index-only option and platform-list both create sparse manifest lists, which usually fail unless the referenced per-architecture images are already present in the destination, or the target registry supports sparse indexes.
+
+When specifying a platform list, all compression variants and other variations for each platform are copied.
 
 **--quiet**, **-q**
 
@@ -265,6 +268,11 @@ $ skopeo copy docker://busybox:latest docker-archive:archive-file.tar:busybox:la
 To copy and sign an image:
 ```console
 $ skopeo copy --sign-by dev@example.com containers-storage:example/busybox:streaming docker://example/busybox:gold
+```
+
+To copy only specific platforms from a multi-architecture image (creates a sparse manifest list):
+```console
+$ skopeo copy --multi-arch=linux/amd64,linux/arm64 docker://quay.io/skopeo/stable:latest docker://registry.example.com/skopeo:latest
 ```
 
 To encrypt an image:
