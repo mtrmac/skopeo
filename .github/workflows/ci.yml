@@ -155,7 +155,6 @@ jobs:
           persist-credentials: false
       - name: fix git safe.directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - run: make vendor
       - name: build + install
         run: |
           make "BUILDTAGS=${{ matrix.buildtags }}" bin/skopeo
