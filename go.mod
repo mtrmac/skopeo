@@ -20,7 +20,7 @@ require (
 	go.podman.io/common v0.68.1
 	go.podman.io/image/v5 v5.40.0
 	go.podman.io/storage v1.63.0
-	go.yaml.in/yaml/v3 v3.0.4
+	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/term v0.45.0
 )
 
