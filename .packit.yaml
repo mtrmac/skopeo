@@ -124,6 +124,7 @@ jobs:
     update_release: false
     dist_git_branches: &fedora_targets
       - fedora-rawhide
+      - fedora-45
     actions:
         post-modifications: >-
           bash -c 'sed -i "s/^\(\s*\)ref: .*/\1ref: v${PACKIT_PROJECT_VERSION}/" ${PACKIT_DOWNSTREAM_REPO}/plans/main.fmf'
