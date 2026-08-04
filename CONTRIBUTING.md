@@ -15,7 +15,7 @@ that we follow.
 
 ## LLM ("AI") Policy
 
-If your contribution is aided by LLMs or other AI tools, please read the [LLM Policy in the Podman project](https://github.com/containers/podman/blob/main/LLM_POLICY.md).
+If your contribution is aided by LLMs or other AI tools, please read the [LLM Policy for the Podman Container Tools project](https://github.com/podman-container-tools/community/blob/main/LLM_POLICY.md).
 This project also follows this LLM policy, which includes comments, issues, PRs, and any other interactions with the team.
 
 ## Reporting Issues
