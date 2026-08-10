@@ -458,7 +458,8 @@ func (s *syncSuite) TestSyncManifestOutput() {
 	destDir3 := filepath.Join(tmpDir, "dest3")
 
 	// Split image:tag path from image URI for manifest comparison
-	imageDir := pullableTaggedImage[strings.LastIndex(pullableTaggedImage, "/")+1:]
+	_, imageDir, ok := strings.CutLast(pullableTaggedImage, "/")
+	require.True(t, ok)
 
 	assertSkopeoSucceeds(t, "", "sync", "--retry-times", "3", "--format=oci", "--all", "--src", "docker", "--dest", "dir", pullableTaggedImage, destDir1)
 	verifyManifestMIMEType(t, filepath.Join(destDir1, imageDir), imgspecv1.MediaTypeImageManifest)

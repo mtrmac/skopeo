@@ -751,10 +751,10 @@ func assertSchema1DirImagesAreEqualExceptNames(t *testing.T, dir1, ref1, dir2, r
 		err = json.Unmarshal(m, &data)
 		require.NoError(t, err)
 		assert.Equal(t, float64(1), data["schemaVersion"])
-		colon := strings.LastIndex(ref, ":")
-		require.NotEqual(t, -1, colon)
-		assert.Equal(t, ref[:colon], data["name"])
-		assert.Equal(t, ref[colon+1:], data["tag"])
+		name, tag, ok := strings.CutLast(ref, ":")
+		require.True(t, ok)
+		assert.Equal(t, name, data["name"])
+		assert.Equal(t, tag, data["tag"])
 		for _, key := range []string{"signatures", "name", "tag"} {
 			delete(data, key)
 		}
