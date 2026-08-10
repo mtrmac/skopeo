@@ -1,7 +1,8 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -175,10 +176,9 @@ func (opts *untrustedSignatureDumpOptions) run(args []string, stdout io.Writer) 
 	if err != nil {
 		return fmt.Errorf("Error decoding untrusted signature: %v", err)
 	}
-	untrustedOut, err := json.MarshalIndent(untrustedInfo, "", "    ")
-	if err != nil {
+	if err := json.MarshalWrite(stdout, untrustedInfo, jsontext.WithIndent("    ")); err != nil {
 		return err
 	}
-	fmt.Fprintln(stdout, string(untrustedOut))
+	fmt.Fprintf(stdout, "\n")
 	return nil
 }

@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -194,11 +195,10 @@ func (opts *tagsOptions) run(args []string, stdout io.Writer) (retErr error) {
 		Tags:       tagListing,
 	}
 
-	out, err := json.MarshalIndent(outputData, "", "    ")
-	if err != nil {
+	if err := json.MarshalWrite(stdout, outputData, jsontext.WithIndent("    ")); err != nil {
 		return err
 	}
-	_, err = fmt.Fprintf(stdout, "%s\n", string(out))
+	_, err = fmt.Fprintf(stdout, "\n")
 
 	return err
 }

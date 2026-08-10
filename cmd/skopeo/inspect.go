@@ -1,7 +1,8 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -223,11 +224,11 @@ func (opts *inspectOptions) run(args []string, stdout io.Writer) (retErr error) 
 // writeOutput writes data depending on opts.format to stdout
 func (opts *inspectOptions) writeOutput(stdout io.Writer, data any) error {
 	if report.IsJSON(opts.format) || opts.format == "" {
-		out, err := json.MarshalIndent(data, "", "    ")
-		if err == nil {
-			fmt.Fprintf(stdout, "%s\n", string(out))
+		if err := json.MarshalWrite(stdout, data, jsontext.WithIndent("    ")); err != nil {
+			return err
 		}
-		return err
+		fmt.Fprintf(stdout, "\n")
+		return nil
 	}
 
 	rpt, err := report.New(stdout, "skopeo inspect").Parse(report.OriginUser, opts.format)
