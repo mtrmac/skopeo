@@ -1,7 +1,7 @@
 module go.podman.io/skopeo
 
 // Minimum required golang version
-go 1.26.0
+go 1.27.0
 
 // Warning: Ensure the "go" and "toolchain" versions match exactly to prevent unwanted auto-updates
 
