@@ -166,7 +166,7 @@ func main() {
 
 	rootCmd, _ := createApp()
 	if err := rootCmd.Execute(); err != nil {
-		slog.Error(err.Error())
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		if isNotFoundImageError(err) {
 			os.Exit(2)
 		}
