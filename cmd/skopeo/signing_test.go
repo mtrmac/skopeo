@@ -45,17 +45,18 @@ func TestStandaloneSign(t *testing.T) {
 	for _, args := range [][]string{
 		{},
 		{"a1", "a2"},
-		{"a1", "a2", "a3"},
 		{"a1", "a2", "a3", "a4"},
 		{"-o", "o", "a1", "a2"},
 		{"-o", "o", "a1", "a2", "a3", "a4"},
 	} {
 		out, err := runSkopeo(append([]string{"standalone-sign"}, args...)...)
-		assertTestFailed(t, out, err, "Usage")
+		assertTestFailed(t, out, err, "exactly three arguments expected")
 	}
+	out, err := runSkopeo("standalone-sign", "a1", "a2", "a3")
+	assertTestFailed(t, out, err, "--output must be specified")
 
 	// Error reading manifest
-	out, err := runSkopeo("standalone-sign", "-o", "/dev/null",
+	out, err = runSkopeo("standalone-sign", "-o", "/dev/null",
 		"/this/does/not/exist", dockerReference, fixturesTestKeyFingerprint)
 	assertTestFailed(t, out, err, "/this/does/not/exist")
 
@@ -105,7 +106,7 @@ func TestStandaloneVerify(t *testing.T) {
 		{"a1", "a2", "a3", "a4", "a5"},
 	} {
 		out, err := runSkopeo(append([]string{"standalone-verify"}, args...)...)
-		assertTestFailed(t, out, err, "Usage")
+		assertTestFailed(t, out, err, "exactly four arguments expected")
 	}
 
 	// Error reading manifest
@@ -163,7 +164,7 @@ func TestUntrustedSignatureDump(t *testing.T) {
 		{"a1", "a2", "a3", "a4"},
 	} {
 		out, err := runSkopeo(append([]string{"untrusted-signature-dump-without-verification"}, args...)...)
-		assertTestFailed(t, out, err, "Usage")
+		assertTestFailed(t, out, err, "exactly one argument expected")
 	}
 
 	// Error reading manifest
