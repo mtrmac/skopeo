@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -152,11 +153,12 @@ func main() {
 	}
 	rootCmd, _ := createApp()
 	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		exitCode := 1
 		if isNotFoundImageError(err) {
-			logrus.StandardLogger().Log(logrus.FatalLevel, err)
-			logrus.Exit(2)
+			exitCode = 2
 		}
-		logrus.Fatal(err)
+		os.Exit(exitCode)
 	}
 }
 
