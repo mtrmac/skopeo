@@ -29,7 +29,7 @@ func TestGenerateSigstoreKey(t *testing.T) {
 		out, err := runSkopeo("generate-sigstore-key",
 			"--output-prefix", prefix, "--passphrase-file", "/dev/null",
 		)
-		assertTestFailed(t, out, err, "Refusing to overwrite")
+		assertTestFailed(t, out, err, "refusing to overwrite")
 	}
 
 	// One of the destinations is inaccessible (simulate by a symlink that tries to

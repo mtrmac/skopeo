@@ -121,12 +121,12 @@ func TestStandaloneVerify(t *testing.T) {
 	// Error verifying signature
 	out, err = runSkopeo("standalone-verify", manifestPath,
 		dockerReference, fixturesTestKeyFingerprint, "fixtures/corrupt.signature")
-	assertTestFailed(t, out, err, "Error verifying signature")
+	assertTestFailed(t, out, err, "verifying signature")
 
 	// Error using any without a public key file
 	out, err = runSkopeo("standalone-verify", manifestPath,
 		dockerReference, "any", signaturePath)
-	assertTestFailed(t, out, err, "Cannot use any fingerprint without a public key file")
+	assertTestFailed(t, out, err, "cannot use any fingerprint without a public key file")
 
 	// Success
 	out, err = runSkopeo("standalone-verify", manifestPath,
@@ -173,7 +173,7 @@ func TestUntrustedSignatureDump(t *testing.T) {
 
 	// Error reading signature (input is not a signature)
 	out, err = runSkopeo("untrusted-signature-dump-without-verification", "fixtures/image.manifest.json")
-	assertTestFailed(t, out, err, "Error decoding untrusted signature")
+	assertTestFailed(t, out, err, "decoding untrusted signature")
 
 	// Success
 	for _, path := range []string{"fixtures/image.signature", "fixtures/corrupt.signature"} {

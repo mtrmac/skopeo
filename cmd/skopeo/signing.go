@@ -42,12 +42,12 @@ func (opts *standaloneSignOptions) run(args []string, stdout io.Writer) error {
 
 	manifest, err := os.ReadFile(manifestPath)
 	if err != nil {
-		return fmt.Errorf("Error reading %s: %w", manifestPath, err)
+		return fmt.Errorf("reading %s: %w", manifestPath, err)
 	}
 
 	mech, err := signature.NewGPGSigningMechanism()
 	if err != nil {
-		return fmt.Errorf("Error initializing GPG: %w", err)
+		return fmt.Errorf("initializing GPG: %w", err)
 	}
 	defer mech.Close()
 
@@ -58,11 +58,11 @@ func (opts *standaloneSignOptions) run(args []string, stdout io.Writer) error {
 
 	signature, err := signature.SignDockerManifestWithOptions(manifest, dockerReference, mech, fingerprint, &signature.SignOptions{Passphrase: passphrase})
 	if err != nil {
-		return fmt.Errorf("Error creating signature: %w", err)
+		return fmt.Errorf("creating signature: %w", err)
 	}
 
 	if err := os.WriteFile(opts.output, signature, 0o644); err != nil {
-		return fmt.Errorf("Error writing signature to %s: %w", opts.output, err)
+		return fmt.Errorf("writing signature to %s: %w", opts.output, err)
 	}
 	return nil
 }
@@ -97,15 +97,15 @@ func (opts *standaloneVerifyOptions) run(args []string, stdout io.Writer) error 
 	signaturePath := args[3]
 
 	if opts.publicKeyFile == "" && len(expectedFingerprints) == 1 && expectedFingerprints[0] == "any" {
-		return fmt.Errorf("Cannot use any fingerprint without a public key file")
+		return fmt.Errorf("cannot use any fingerprint without a public key file")
 	}
 	unverifiedManifest, err := os.ReadFile(manifestPath)
 	if err != nil {
-		return fmt.Errorf("Error reading manifest from %s: %w", manifestPath, err)
+		return fmt.Errorf("reading manifest from %s: %w", manifestPath, err)
 	}
 	unverifiedSignature, err := os.ReadFile(signaturePath)
 	if err != nil {
-		return fmt.Errorf("Error reading signature from %s: %w", signaturePath, err)
+		return fmt.Errorf("reading signature from %s: %w", signaturePath, err)
 	}
 
 	var mech signature.SigningMechanism
@@ -113,16 +113,16 @@ func (opts *standaloneVerifyOptions) run(args []string, stdout io.Writer) error 
 	if opts.publicKeyFile != "" {
 		publicKeys, err := os.ReadFile(opts.publicKeyFile)
 		if err != nil {
-			return fmt.Errorf("Error reading public keys from %s: %w", opts.publicKeyFile, err)
+			return fmt.Errorf("reading public keys from %s: %w", opts.publicKeyFile, err)
 		}
 		mech, publicKeyfingerprints, err = signature.NewEphemeralGPGSigningMechanism(publicKeys)
 		if err != nil {
-			return fmt.Errorf("Error initializing GPG: %w", err)
+			return fmt.Errorf("initializing GPG: %w", err)
 		}
 	} else {
 		mech, err = signature.NewGPGSigningMechanism()
 		if err != nil {
-			return fmt.Errorf("Error initializing GPG: %w", err)
+			return fmt.Errorf("initializing GPG: %w", err)
 		}
 	}
 	defer mech.Close()
@@ -133,7 +133,7 @@ func (opts *standaloneVerifyOptions) run(args []string, stdout io.Writer) error 
 
 	sig, verificationFingerprint, err := signature.VerifyImageManifestSignatureUsingKeyIdentityList(unverifiedSignature, unverifiedManifest, expectedDockerReference, mech, expectedFingerprints)
 	if err != nil {
-		return fmt.Errorf("Error verifying signature: %w", err)
+		return fmt.Errorf("verifying signature: %w", err)
 	}
 
 	fmt.Fprintf(stdout, "Signature verified using fingerprint %s, digest %s\n", verificationFingerprint, sig.DockerManifestDigest)
@@ -168,12 +168,12 @@ func (opts *untrustedSignatureDumpOptions) run(args []string, stdout io.Writer) 
 
 	untrustedSignature, err := os.ReadFile(untrustedSignaturePath)
 	if err != nil {
-		return fmt.Errorf("Error reading untrusted signature from %s: %w", untrustedSignaturePath, err)
+		return fmt.Errorf("reading untrusted signature from %s: %w", untrustedSignaturePath, err)
 	}
 
 	untrustedInfo, err := signature.GetUntrustedSignatureInformationWithoutVerifying(untrustedSignature)
 	if err != nil {
-		return fmt.Errorf("Error decoding untrusted signature: %v", err)
+		return fmt.Errorf("decoding untrusted signature: %w", err)
 	}
 	untrustedOut, err := json.MarshalIndent(untrustedInfo, "", "    ")
 	if err != nil {
