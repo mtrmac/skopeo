@@ -167,10 +167,11 @@ func main() {
 	rootCmd, _ := createApp()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		exitCode := 1
 		if isNotFoundImageError(err) {
-			os.Exit(2)
+			exitCode = 2
 		}
-		os.Exit(1)
+		os.Exit(exitCode)
 	}
 }
 
