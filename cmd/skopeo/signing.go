@@ -33,8 +33,11 @@ func standaloneSignCmd() *cobra.Command {
 }
 
 func (opts *standaloneSignOptions) run(args []string, stdout io.Writer) error {
-	if len(args) != 3 || opts.output == "" {
-		return errors.New("Usage: skopeo standalone-sign manifest docker-reference key-fingerprint -o signature")
+	if len(args) != 3 {
+		return errorShouldDisplayUsage{errors.New("exactly three arguments expected")}
+	}
+	if opts.output == "" {
+		return errorShouldDisplayUsage{errors.New("--output must be specified")}
 	}
 	manifestPath := args[0]
 	dockerReference := args[1]
@@ -89,7 +92,7 @@ KEY-FINGERPRINTS can be a comma separated list of fingerprints, or "any" if you 
 
 func (opts *standaloneVerifyOptions) run(args []string, stdout io.Writer) error {
 	if len(args) != 4 {
-		return errors.New("Usage: skopeo standalone-verify manifest docker-reference key-fingerprint signature")
+		return errorShouldDisplayUsage{errors.New("exactly four arguments expected")}
 	}
 	manifestPath := args[0]
 	expectedDockerReference := args[1]
@@ -162,7 +165,7 @@ func untrustedSignatureDumpCmd() *cobra.Command {
 
 func (opts *untrustedSignatureDumpOptions) run(args []string, stdout io.Writer) error {
 	if len(args) != 1 {
-		return errors.New("Usage: skopeo untrusted-signature-dump-without-verification signature")
+		return errorShouldDisplayUsage{errors.New("exactly one argument expected")}
 	}
 	untrustedSignaturePath := args[0]
 

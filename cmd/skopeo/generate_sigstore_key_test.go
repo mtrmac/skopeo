@@ -11,13 +11,10 @@ import (
 
 func TestGenerateSigstoreKey(t *testing.T) {
 	// Invalid command-line arguments
-	for _, args := range [][]string{
-		{},
-		{"--output-prefix", "foo", "a1"},
-	} {
-		out, err := runSkopeo(append([]string{"generate-sigstore-key"}, args...)...)
-		assertTestFailed(t, out, err, "Usage")
-	}
+	out, err := runSkopeo("generate-sigstore-key")
+	assertTestFailed(t, out, err, "--output-prefix must be specified")
+	out, err = runSkopeo("generate-sigstore-key", "--output-prefix", "foo", "a1")
+	assertTestFailed(t, out, err, "no arguments expected")
 
 	// One of the destination files already exists
 	outputSuffixes := []string{".pub", ".private"}
@@ -49,7 +46,7 @@ func TestGenerateSigstoreKey(t *testing.T) {
 	}
 	destDir := t.TempDir()
 	// Error reading passphrase
-	out, err := runSkopeo("generate-sigstore-key",
+	out, err = runSkopeo("generate-sigstore-key",
 		"--output-prefix", filepath.Join(destDir, "prefix"),
 		"--passphrase-file", filepath.Join(destDir, "this-does-not-exist"),
 	)

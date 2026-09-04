@@ -80,7 +80,7 @@ func (opts *inspectOptions) run(args []string, stdout io.Writer) (retErr error) 
 	defer cancel()
 
 	if len(args) != 1 {
-		return errors.New("exactly one argument expected")
+		return errorShouldDisplayUsage{errors.New("exactly one argument expected")}
 	}
 	if opts.raw && opts.format != "" {
 		return errors.New("raw output does not support format option")
