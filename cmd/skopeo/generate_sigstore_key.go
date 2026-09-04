@@ -37,11 +37,11 @@ func generateSigstoreKeyCmd() *cobra.Command {
 func ensurePathDoesNotExist(path string) error {
 	switch _, err := os.Stat(path); {
 	case err == nil:
-		return fmt.Errorf("Refusing to overwrite existing %q", path)
+		return fmt.Errorf("refusing to overwrite existing %q", path)
 	case errors.Is(err, fs.ErrNotExist):
 		return nil
 	default:
-		return fmt.Errorf("Error checking existence of %q: %w", path, err)
+		return fmt.Errorf("checking existence of %q: %w", path, err)
 	}
 }
 
@@ -76,14 +76,14 @@ func (opts *generateSigstoreKeyOptions) run(args []string, stdout io.Writer) err
 
 	keys, err := sigstore.GenerateKeyPair([]byte(passphrase))
 	if err != nil {
-		return fmt.Errorf("Error generating key pair: %w", err)
+		return fmt.Errorf("generating key pair: %w", err)
 	}
 
 	if err := os.WriteFile(privateKeyPath, keys.PrivateKey, 0o600); err != nil {
-		return fmt.Errorf("Error writing private key to %q: %w", privateKeyPath, err)
+		return fmt.Errorf("writing private key to %q: %w", privateKeyPath, err)
 	}
 	if err := os.WriteFile(pubKeyPath, keys.PublicKey, 0o644); err != nil {
-		return fmt.Errorf("Error writing private key to %q: %w", pubKeyPath, err)
+		return fmt.Errorf("writing private key to %q: %w", pubKeyPath, err)
 	}
 	fmt.Fprintf(stdout, "Key written to %q and %q\n", privateKeyPath, pubKeyPath)
 	return nil
