@@ -11,7 +11,6 @@ Maintainers and Reviewers on other Podman Container Tools projects are found in 
 
 | Maintainer        | GitHub ID                                                | Project Roles | Affiliation                                  |
 | ----------------- | -------------------------------------------------------- | ------------- | -------------------------------------------- |
-| Lokesh Mandvekar  | [lsm5](https://github.com/lsm5)                          | Maintainer    | [Red Hat](https://github.com/RedHatOfficial) |
 | Tom Sweeney       | [TomSweeneyRedHat](https://github.com/TomSweeneyRedHat/) | Maintainer    | [Red Hat](https://github.com/RedHatOfficial) |
 | Dan Walsh         | [rhatdan](https://github.com/rhatdan)                    | Maintainer    | [Red Hat](https://github.com/RedHatOfficial) |
 | Ashley Cui        | [ashley-cui](https://github.com/ashley-cui)              | Reviewer      | [Red Hat](https://github.com/RedHatOfficial) |
@@ -20,7 +19,9 @@ Maintainers and Reviewers on other Podman Container Tools projects are found in 
 
 ## Alumni
 
-None at present
+| Maintainer        | GitHub ID                                                | Project Roles | Affiliation                                  |
+| ----------------- | -------------------------------------------------------- | ------------- | -------------------------------------------- |
+| Lokesh Mandvekar  | [lsm5](https://github.com/lsm5)                          | Maintainer    | [Red Hat](https://github.com/RedHatOfficial) |
 
 ## Credits
 
