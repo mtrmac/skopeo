@@ -1,10 +1,10 @@
 <p align="center">
-   <img src="https://cdn.rawgit.com/containers/skopeo/main/docs/skopeo.svg" width="250" alt="Skopeo">
+   <img src="https://raw.githubusercontent.com/podman-container-tools/skopeo/main/docs/skopeo.svg" width="250" alt="Skopeo">
 </p>
 
 ----
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containers/skopeo)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/podman-container-tools/skopeo)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10516/badge)](https://www.bestpractices.dev/projects/10516)
 
 `skopeo` is a command line utility that performs various operations on container images and image repositories.
