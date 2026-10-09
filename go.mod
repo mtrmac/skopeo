@@ -19,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	go.podman.io/common v0.69.2
 	go.podman.io/image/v5 v5.41.2
-	go.podman.io/storage v1.64.1
+	go.podman.io/storage v1.64.2
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/term v0.46.0
 )
