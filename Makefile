@@ -74,7 +74,7 @@ CI ?=
 export SKOPEO_CONTAINER_TESTS ?= $(if $(CI),1,0)
 
 # Container image used by the test-integration / test-system wrapper targets.
-# Set this to a skopeo_cidev image (e.g. quay.io/libpod/skopeo_cidev:<tag>)
+# Set this to a skopeo_cidev image (e.g. ghcr.io/podman-container-tools/skopeo_cidev:<tag>)
 # when running those targets locally. If unset, the wrapper targets will fail
 # loudly with an empty image reference.
 SKOPEO_CIDEV_CONTAINER_FQIN ?=
